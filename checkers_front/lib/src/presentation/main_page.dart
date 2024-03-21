@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'widgets/board.dart';
+
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
@@ -7,13 +9,9 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: SafeArea(
-        child: Placeholder(
-          child: Center(
-            child: Text(
-              'Placeholder',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
+        minimum: EdgeInsets.all(16),
+        child: Center(
+          child: Board(),
         ),
       ),
     );
