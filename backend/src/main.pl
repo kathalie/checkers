@@ -25,8 +25,16 @@ board_eat([
     cell(curr_player, 3, 6), cell(enemy, 2, 5)
 ]).
 
+board_eat2([
+    cell(enemy, 3, 6), cell(curr_player, 2, 5)
+]).
+
 board_cannot_eat([
     cell(curr_player, 2, 5), cell(enemy, 1, 4)
+]).
+
+board_cannot_eat2([
+    cell(curr_player, 3, 6), cell(curr_player, 2, 5)
 ]).
 
 material_value(enemy, 1).
@@ -75,10 +83,10 @@ evaluate_board([cell(Checker, Row, Col) | RestOfBoard], CurrentScore, Score) :-
 
 
 % Define what type of checker is located in the cell (Row, Col).
-% get_checker(+Board, +Row, +Col, -Checker)
-get_checker([cell(Checker, Row, Col) | _], Row, Col, Checker).
-get_checker([_ | RestOfBoard], Row, Col, Checker) :-
-    get_checker(RestOfBoard, Row, Col, Checker).
+% checker(+Board, +Row, +Col, -Checker)
+checker([cell(Checker, Row, Col) | _], Row, Col, Checker).
+checker([_ | RestOfBoard], Row, Col, Checker) :-
+    checker(RestOfBoard, Row, Col, Checker).
 
 
 % are_in_diagonal(+Row1, +Col1, +Row2, +Col2)
@@ -101,7 +109,7 @@ move(_, NewRow, NewCol, Board, Board) :-
     (
         \+ is_valid(NewRow); 
         \+ is_valid(NewCol);
-        get_checker(Board, NewRow, NewCol, _) % the cell is occupied!!!
+        checker(Board, NewRow, NewCol, _) % the cell is occupied!!!
     ), !.
 
 % Move is possible and the board is updated
@@ -120,23 +128,38 @@ is_valid(ColOrRow) :-
 % enemy goes from 1 to 8
 % curr_player goes from 8 to 1
 % eat_checker(+Checker, +CheckerToEat, +Board, -NewBoard)
-eat_checker(cell(curr_player, RowCurr, ColCurr), cell(enemy, RowEnemy, ColEnemy), Board, NewBoard) :-
+eat_checker(cell(CheckerCurr, RowCurr, ColCurr), cell(CheckerEnemy, RowEnemy, ColEnemy), Board, NewBoard) :-
     are_in_diagonal(RowCurr, ColCurr, RowEnemy, ColEnemy),
+    % checker(Board, RowCurr, ColCurr, CheckerCurr),
+    % checker(Board, RowEnemy, ColEnemy, CheckerEnemy),
+    opponent(CheckerCurr, CheckerEnemy),
     % Define direction to move the checker.
     HVector is RowEnemy - RowCurr,
     VVector is ColEnemy - ColCurr,
     NewRow is RowCurr + 2 * HVector, is_valid(NewRow),
     NewCol is ColCurr + 2 * VVector, is_valid(NewCol),
     % Move the checker to a new position.
-    move(cell(curr_player, RowCurr, ColCurr), NewRow, NewCol, Board, IntermediaryBoard),
+    move(cell(CheckerCurr, RowCurr, ColCurr), NewRow, NewCol, Board, IntermediaryBoard),
     % Eat the checker and remove it from board.
-    select(cell(enemy, RowEnemy, ColEnemy), IntermediaryBoard, NewBoard), 
+    select(cell(CheckerEnemy, RowEnemy, ColEnemy), IntermediaryBoard, NewBoard), 
     !. 
+
 
 % eat_checker(_, _, Board, Board) :- !.
 
 
 
 
+
+
+alphabeta(Board, 0, _, _, Score) :-
+    evaluate_board(Board, Score).
+
+%alphabeta(Board, Depth, Alpha, Beta, Score) :- 
+
+
+
+
+% make_a_move(Board, NewBoards) :-
 
 
