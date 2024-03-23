@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 import '../../domain/typedefs.dart';
 import '../checker.dart';
 import 'board.dart';
@@ -6,9 +8,9 @@ import 'board_mixin.dart';
 abstract class _BoardImpl implements Board {}
 
 class BoardImpl extends _BoardImpl with BoardMixin {
-  final List<List<Checker?>> field;
+  final List<List<Checker?>> _field;
 
-  BoardImpl(this.field);
+  BoardImpl(this._field);
 
   @override
   Checker? operator [](Position pos) {
@@ -16,7 +18,7 @@ class BoardImpl extends _BoardImpl with BoardMixin {
 
     final (row, col) = pos;
 
-    return field[row][col];
+    return _field[row][col];
   }
 
   @override
@@ -25,7 +27,7 @@ class BoardImpl extends _BoardImpl with BoardMixin {
 
     final (row, col) = pos;
 
-    field[row][col] = checker;
+    _field[row][col] = checker;
   }
 
   void _validatePosition(Position pos) {
@@ -33,4 +35,14 @@ class BoardImpl extends _BoardImpl with BoardMixin {
       throw StateError('Tried accessing an invalid position $pos');
     }
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BoardImpl &&
+          runtimeType == other.runtimeType &&
+          const ListEquality(DeepCollectionEquality()).equals(_field, other._field);
+
+  @override
+  int get hashCode => _field.hashCode;
 }

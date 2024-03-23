@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../application/checker.dart';
 import '../../domain/constants.dart';
-import '../../domain/constraints/checker_color.dart';
 
 class CheckerWidget extends StatelessWidget {
   final Checker checker;
@@ -18,10 +17,7 @@ class CheckerWidget extends StatelessWidget {
     const outerPiecePadding = EdgeInsets.all(2);
     const innerPieceFraction = 0.7;
 
-    final (outerColor!, innerColor!) = switch (checker.color) {
-      CheckerColor.black => (Colors.grey[800], Colors.grey[700]),
-      CheckerColor.white => (Colors.grey[500], Colors.grey[400]),
-    };
+    final (outerColor, innerColor) = checker.color.displayColors;
 
     return AspectRatio(
       aspectRatio: 1 / 1,

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../application/board/board.dart';
 import '../../application/checker.dart';
 import '../../domain/constants.dart';
-import '../../domain/constraints/checker_color.dart';
+import '../../domain/typedefs.dart';
 import '../../util/coordinates_transform.dart';
+import '../visuals.dart';
 import 'checker_widget.dart';
 
 class BoardWidget extends StatelessWidget {
-  const BoardWidget({super.key});
+  final Board board;
+
+  const BoardWidget({required this.board, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,15 +22,7 @@ class BoardWidget extends StatelessWidget {
         crossAxisCount: 8,
         children: List.generate(
           8 * 8,
-          (index) => BoardCell(
-            position: flatToPosition(index),
-            pieceContained: index % 5 == 0
-                ? null
-                : Checker(
-                    color: index.isEven ? CheckerColor.black : CheckerColor.white,
-                    isKing: false,
-                  ),
-          ),
+          (index) => BoardCell.fromBoard(board, position: flatToPosition(index)),
         ),
       ),
     );
@@ -42,6 +38,9 @@ class BoardCell extends StatelessWidget {
     this.pieceContained,
     super.key,
   });
+
+  static BoardCell fromBoard(Board board, {required Position position}) =>
+      BoardCell(position: position, pieceContained: board[position]);
 
   Border get border {
     const side = BorderSide();
@@ -60,11 +59,15 @@ class BoardCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pieceContained = this.pieceContained;
+    final isBlackCell = position.$1.isOdd ? position.$2.isEven : position.$2.isOdd;
 
     return AspectRatio(
       aspectRatio: 1 / 1,
       child: Container(
-        decoration: BoxDecoration(border: border),
+        decoration: BoxDecoration(
+          border: border,
+          color: isBlackCell ? blackCellColor : null,
+        ),
         child: pieceContained != null
             ? Center(
                 child: CheckerWidget(

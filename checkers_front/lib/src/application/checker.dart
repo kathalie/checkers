@@ -24,4 +24,15 @@ class Checker {
         .map((dir) => add(vector: dir, toPosition: pos))
         .where(board.isValidPosition);
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Checker &&
+          runtimeType == other.runtimeType &&
+          color == other.color &&
+          isKing == other.isKing;
+
+  @override
+  int get hashCode => color.hashCode ^ isKing.hashCode;
 }
