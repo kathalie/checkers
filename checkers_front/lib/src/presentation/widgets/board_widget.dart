@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/checker.dart';
+import '../../application/checker.dart';
 import '../../domain/constants.dart';
 import '../../domain/constraints/checker_color.dart';
 import '../../util/coordinates_transform.dart';
