@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import '../../domain/constants.dart';
 import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
@@ -32,7 +31,7 @@ class GameDriver extends ChangeNotifier {
   void _onMoved() {
     final lastMoved = _lastMoved;
 
-    if (lastMoved == null || lastMoved.$1 != boardSide - _currentPlayerColor.homeRow - 1) {
+    if (lastMoved == null || lastMoved.$1 != _currentPlayerColor.flip().homeRow) {
       return;
     }
 
@@ -89,7 +88,7 @@ class GameDriver extends ChangeNotifier {
   void _promoteAt(Position pos) {
     final checker = _board[pos];
 
-    if (checker == null || checker.isKing || pos.$1 == checker.color.homeRow) {
+    if (checker == null || checker.isKing) {
       return;
     }
 
