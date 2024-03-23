@@ -1,21 +1,32 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/checker.dart';
 import '../../domain/constants.dart';
-import '../../domain/piece.dart';
+import '../../domain/constraints/checker_color.dart';
 import '../../util/coordinates_transform.dart';
+import 'checker_widget.dart';
 
-class Board extends StatelessWidget {
-  const Board({super.key});
+class BoardWidget extends StatelessWidget {
+  const BoardWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 1 / 1,
       child: GridView.count(
+        physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 8,
         children: List.generate(
           8 * 8,
-          (index) => BoardCell(position: flatToPosition(index)),
+          (index) => BoardCell(
+            position: flatToPosition(index),
+            pieceContained: index % 5 == 0
+                ? null
+                : Checker(
+                    color: index.isEven ? CheckerColor.black : CheckerColor.white,
+                    isKing: false,
+                  ),
+          ),
         ),
       ),
     );
@@ -24,7 +35,7 @@ class Board extends StatelessWidget {
 
 class BoardCell extends StatelessWidget {
   final (int, int) position;
-  final Piece? pieceContained;
+  final Checker? pieceContained;
 
   const BoardCell({
     required this.position,
@@ -48,10 +59,19 @@ class BoardCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pieceContained = this.pieceContained;
+
     return AspectRatio(
       aspectRatio: 1 / 1,
       child: Container(
         decoration: BoxDecoration(border: border),
+        child: pieceContained != null
+            ? Center(
+                child: CheckerWidget(
+                  checker: pieceContained,
+                ),
+              )
+            : null,
       ),
     );
   }

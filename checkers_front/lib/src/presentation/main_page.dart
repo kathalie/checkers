@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/board.dart';
+import 'widgets/board_widget.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -11,7 +11,7 @@ class MainPage extends StatelessWidget {
       body: SafeArea(
         minimum: EdgeInsets.all(16),
         child: Center(
-          child: Board(),
+          child: BoardWidget(),
         ),
       ),
     );
