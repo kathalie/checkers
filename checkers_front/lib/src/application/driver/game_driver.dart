@@ -44,6 +44,7 @@ class GameDriver extends ChangeNotifier {
   Future<void> step() async {
     final Movement(:from, :to) = await _currentHandle.takeTurn(
       board: _board,
+      color: _currentPlayerColor,
       lastMoved: _lastMoved,
     );
 
