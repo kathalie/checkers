@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 
+import '../../domain/constants.dart';
 import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
 import '../board/board.dart';
+import '../checker.dart';
 import 'player_handle.dart';
 
 class GameDriver extends ChangeNotifier {
@@ -24,15 +26,21 @@ class GameDriver extends ChangeNotifier {
   void _switchTurn() {
     _currentPlayerColor = _currentPlayerColor.flip();
     _lastMoved = null;
-
-    notifyListeners();
   }
 
   /// Is called when the movement has been made, but the current turn is not over yet.
-  void _onMoved() {}
+  void _onMoved() {
+    final lastMoved = _lastMoved;
+
+    if (lastMoved == null || lastMoved.$1 != boardSide - _currentPlayerColor.homeRow - 1) {
+      return;
+    }
+
+    _promoteAt(lastMoved);
+  }
 
   /// Is called when the movement has been made and the turn was switched.
-  void _onStepEnded() {}
+  void _onStepEnded() => notifyListeners();
 
   Future<void> step() async {
     final Movement(:from, :to) = await _currentHandle.takeTurn(
@@ -75,6 +83,17 @@ class GameDriver extends ChangeNotifier {
   void _move({required Position from, required Position to}) {
     _board[to] = _board[from];
     _board[from] = null;
+    _lastMoved = to;
+  }
+
+  void _promoteAt(Position pos) {
+    final checker = _board[pos];
+
+    if (checker == null || checker.isKing || pos.$1 == checker.color.homeRow) {
+      return;
+    }
+
+    _board[pos] = Checker(color: checker.color, isKing: true);
   }
 
   bool _canBeatAt(Position pos) {

@@ -9,6 +9,9 @@ enum CheckerColor {
   /// (Outer, inner) colors of a checker.
   final (Color, Color) displayColors;
 
+  /// In which row the opponent checkers are promoted.
+  final int homeRow;
+
   const CheckerColor(this.displayColors);
 
   CheckerColor flip() => switch (this) {
