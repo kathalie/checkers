@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
@@ -7,17 +5,27 @@ import '../board/board.dart';
 import '../checker.dart';
 import 'player_handle.dart';
 
-class GameDriver extends ChangeNotifier {
+class GameDriver {
   final Board _board;
   final List<PlayerHandle> _handles;
   CheckerColor _currentPlayerColor = CheckerColor.white;
   Position? _lastMoved;
+
+  /// Is called when the movement has been made and the turn was switched.
+  void Function()? onStepEnded;
 
   GameDriver(
     this._board, {
     required PlayerHandle p1Handle,
     required PlayerHandle p2Handle,
   }) : _handles = List.unmodifiable([p1Handle, p2Handle]);
+
+  /// Returns a copy of this [GameDriver].
+  GameDriver copy() {
+    return GameDriver(_board, p1Handle: _handles.first, p2Handle: _handles.last)
+      .._currentPlayerColor = _currentPlayerColor
+      .._lastMoved = _lastMoved;
+  }
 
   PlayerHandle get _currentHandle =>
       _currentPlayerColor == CheckerColor.white ? _handles.first : _handles.last;
@@ -37,9 +45,6 @@ class GameDriver extends ChangeNotifier {
 
     _promoteAt(lastMoved);
   }
-
-  /// Is called when the movement has been made and the turn was switched.
-  void _onStepEnded() => notifyListeners();
 
   Future<void> step() async {
     final Movement(:from, :to) = await _currentHandle.takeTurn(
@@ -77,7 +82,7 @@ class GameDriver extends ChangeNotifier {
         }
     }
 
-    _onStepEnded();
+    onStepEnded?.call();
   }
 
   void _move({required Position from, required Position to}) {
