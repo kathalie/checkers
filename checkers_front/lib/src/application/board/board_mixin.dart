@@ -1,10 +1,11 @@
-import '../checker.dart';
 import '../../domain/constants.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/position_functions.dart';
 import '../../domain/typedefs.dart';
+import '../checker.dart';
 import 'board.dart';
 
+const _canMove = CanMove();
 const _cannotMove = CannotMove();
 
 mixin BoardMixin on Board {
@@ -38,20 +39,20 @@ mixin BoardMixin on Board {
     final length = diagonalVectorLength(vec);
 
     if (length == 1) {
-      return CanMove(from: from, to: to);
+      return _canMove;
     }
 
     final firstCheckerBetween = _firstCheckerBetween(from, to);
 
     if (firstCheckerBetween == null) {
-      return checker.isKing ? CanMove(from: from, to: to) : _cannotMove;
+      return checker.isKing ? _canMove : _cannotMove;
     }
 
     final (other, pos) = firstCheckerBetween;
 
     if (other.color != checker.color &&
         (checker.isKing || diagonalDistanceBetween(from, pos) == 2)) {
-      return MustBeat(from: from, to: to, beatsAt: pos);
+      return MustBeat(at: pos);
     }
 
     return _cannotMove;

@@ -10,4 +10,9 @@ enum CheckerColor {
   final (Color, Color) displayColors;
 
   const CheckerColor(this.displayColors);
+
+  CheckerColor flip() => switch (this) {
+        CheckerColor.white => CheckerColor.black,
+        CheckerColor.black => CheckerColor.white,
+      };
 }
