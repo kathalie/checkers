@@ -1,106 +1,53 @@
-% Define initial board configuration
-initial_board([
-    cell(enemy, 1, 1), cell(enemy, 1, 3), cell(enemy, 1, 5), cell(enemy, 1, 7),
-    cell(enemy, 2, 2), cell(enemy, 2, 4), cell(enemy, 2, 6), cell(enemy, 2, 8),
-    cell(enemy, 3, 1), cell(enemy, 3, 3), cell(enemy, 3, 5), cell(enemy, 3, 7),
-    cell(curr_player, 6, 2), cell(curr_player, 6, 4), cell(curr_player, 6, 6), cell(curr_player, 6, 8),
-    cell(curr_player, 7, 1), cell(curr_player, 7, 3), cell(curr_player, 7, 5), cell(curr_player, 7, 7),
-    cell(curr_player, 8, 2), cell(curr_player, 8, 4), cell(curr_player, 8, 6), cell(curr_player, 8, 8)
-]).
+% test_boards.pl
+:- use_module(boards).
+:- use_module(evaluation).
+:- use_module(utils).
 
-board2([
-    cell(enemy, 1, 1), cell(enemy, 1, 3), cell(enemy, 1, 5), cell(enemy, 1, 7),
-    cell(enemy, 2, 2), cell(enemy, 2, 4), cell(enemy, 2, 6), cell(enemy, 2, 8),
-    cell(enemy, 3, 1), cell(enemy, 3, 3), cell(enemy, 3, 5), cell(enemy, 3, 7),
-    cell(curr_player, 6, 2), cell(curr_player, 6, 4), cell(curr_player, 6, 6), cell(curr_player, 6, 8),
-    cell(curr_player, 7, 1), cell(curr_player, 7, 3), cell(curr_player, 7, 5), cell(curr_player, 7, 7)
-]).
+% Define two types of players and their possible pieces in the game.
+player(black, b).
+player(black, bq).
+player(white, w).
+player(white, wq).
 
-board_curr_wins([
-    cell(curr_player, 6, 2), cell(curr_player, 6, 4), cell(curr_player, 6, 6), cell(curr_player, 6, 8),
-    cell(curr_player, 7, 1), cell(curr_player, 7, 3), cell(curr_player, 7, 5), cell(curr_player, 7, 7)
-]).
+% Define which pieces are queens.
+queen(wq).
+queen(bq).
 
-board_eat([
-    cell(curr_player, 3, 6), cell(enemy, 2, 5)
-]).
-
-board_eat2([
-    cell(enemy, 3, 6), cell(curr_player, 2, 5)
-]).
-
-board_cannot_eat([
-    cell(curr_player, 2, 5), cell(enemy, 1, 4)
-]).
-
-board_cannot_eat2([
-    cell(curr_player, 3, 6), cell(curr_player, 2, 5)
-]).
-
-material_value(enemy, 1).
-material_value(curr_player, -1).
-material_value(enemy_king, 2).
-material_value(curr_player_king, -2).
-
-% % positional_value(+Checker, +Row, -Value)
-% positional_value(Checker, Row, Value) :-
-%     Coef = 
-
-wins(Board, enemy) :-
-    \+ member(cell(curr_player, _, _), Board),
-    \+ member(cell(curr_player_king, _, _), Board).
+% Checks if there is a winner.
+% wins(+Board, ?Ch).
+wins(Board, b) :-
+    \+ member(cell(w, _, _), Board),
+    \+ member(cell(wq, _, _), Board).
     
-wins(Board, curr_player) :-
-    \+ member(cell(enemy, _, _), Board),
-    \+ member(cell(enemy_king, _, _), Board).
+wins(Board, w) :-
+    \+ member(cell(b, _, _), Board),
+    \+ member(cell(bq, _, _), Board).
 
-opponent(enemy, curr_player).
-opponent(curr_player, enemy).
+% Checks if Ch1 is opponent of Ch2.
+% opponent(?Ch1, ?Ch2)
+opponent(Ch1, Ch2) :-
+    (player(black, Ch1), player(white, Ch2));
+    (player(white, Ch1), player(black, Ch1)).
 
-% Cheker becomes a king when reaches the opposite row of the board. Otherwise it is a still a checker.
-% promote(+Row, +Checker, -CheckerOrKing).
-promote(1, curr_player, curr_player_king) :- !.
-promote(8, enemy, enemy_king) :- !.
-promote(_, Checker, Checker) :- !.
+% A cheker becomes a queen when reaches the opposite edge of the board. Otherwise it is a still a simple checker.
+% promote(+R, +Ch, -CheckerOrQueen).
+promote(1, w, wq) :- !.
+promote(8, b, bq) :- !.
+promote(_, Ch, Ch) :- !.
 
+% Define what type of checker is located in the cell(Ch, R, C).
+% checker(+Board, +R, +C, -Ch)
+checker([cell(Ch, R, C) | _], R, C, Ch).
+checker([_ | RestOfBoard], R, C, Ch) :-
+    checker(RestOfBoard, R, C, Ch).
 
-% evaluate_board(+Board, -Score)
-evaluate_board(Board, -1000) :-
-    wins(Board, enemy).
-
-evaluate_board(Board, 1000) :-
-    wins(Board, curr_player).
-
-evaluate_board(Board, Score) :-
-    evaluate_board(Board, 0, Score).
-
-evaluate_board([], Score, Score).
-
-evaluate_board([cell(Checker, Row, Col) | RestOfBoard], CurrentScore, Score) :-
-    material_value(Checker, AddToScore),
-    NewScore is CurrentScore + AddToScore,
-    evaluate_board(RestOfBoard, NewScore, Score).
-
-
-% Define what type of checker is located in the cell (Row, Col).
-% checker(+Board, +Row, +Col, -Checker)
-checker([cell(Checker, Row, Col) | _], Row, Col, Checker).
-checker([_ | RestOfBoard], Row, Col, Checker) :-
-    checker(RestOfBoard, Row, Col, Checker).
-
-
-% are_in_diagonal(+Row1, +Col1, +Row2, +Col2)
-are_in_diagonal(Row1, Col1, Row2, Col2) :-
-    RowDiff = Row1 - Row2, 
-    abs(RowDiff) =:= 1,
-    ColDiff = Col1 - Col2,
-    abs(ColDiff) =:= 1, !.
-
-
-% replace(+Element, +List, +NewElement, -NewList)
-replace(Element, List, NewElement, NewList) :-
-    append(Start, [Element | End], List),
-    append(Start, [NewElement | End], NewList), !.
+% Checks if checkers in cells (R1, C1) and (R2, C2) respectively have a corner in common.
+% are_neighbours(+R1, +C1, +R2, +C2)
+are_neighbours(R1, C1, R2, C2) :-
+    RDiff = R1 - R2, 
+    abs(RDiff) =:= 1,
+    CDiff = C1 - C2,
+    abs(CDiff) =:= 1, !.
 
 
 % move(+Cell, +NewRow, +NewCol, +Board, -NewBoard) 
@@ -113,23 +60,22 @@ move(_, NewRow, NewCol, Board, Board) :-
     ), !.
 
 % Move is possible and the board is updated
-move(cell(Checker, Row, Col), NewRow, NewCol, Board, NewBoard) :-
+move(cell(Ch, R, C), NewRow, NewCol, Board, NewBoard) :-
     is_valid(NewRow), is_valid(NewCol),
-    promote(NewRow, Checker, NewChecker),
-    replace(cell(Checker, Row, Col), Board, cell(NewChecker, NewRow, NewCol), NewBoard), !.
+    promote(NewRow, Ch, NewChecker),
+    replace(cell(Ch, R, C), Board, cell(NewChecker, NewRow, NewCol), NewBoard), !.
     
 
 % is_valid(+ColOrRow).
 % Checks is column or row exists on a board.
 is_valid(ColOrRow) :-
-    ColOrRow > 0, ColOrRow < 9, !.
+    ColOrRow >= 0, ColOrRow =<7, !.
 
 
-% enemy goes from 1 to 8
-% curr_player goes from 8 to 1
-% eat_checker(+Checker, +CheckerToEat, +Board, -NewBoard)
-eat_checker(cell(CheckerCurr, RowCurr, ColCurr), cell(CheckerEnemy, RowEnemy, ColEnemy), Board, NewBoard) :-
-    are_in_diagonal(RowCurr, ColCurr, RowEnemy, ColEnemy),
+
+% eat(+Ch, +CheckerToEat, +Board, -NewBoard)
+eat(cell(CheckerCurr, RowCurr, ColCurr), cell(CheckerEnemy, RowEnemy, ColEnemy), Board, NewBoard) :-
+    are_neighbours(RowCurr, ColCurr, RowEnemy, ColEnemy),
     % checker(Board, RowCurr, ColCurr, CheckerCurr),
     % checker(Board, RowEnemy, ColEnemy, CheckerEnemy),
     opponent(CheckerCurr, CheckerEnemy),
@@ -144,22 +90,10 @@ eat_checker(cell(CheckerCurr, RowCurr, ColCurr), cell(CheckerEnemy, RowEnemy, Co
     select(cell(CheckerEnemy, RowEnemy, ColEnemy), IntermediaryBoard, NewBoard), 
     !. 
 
-
-% eat_checker(_, _, Board, Board) :- !.
-
+% eat(_, _, Board, Board) :- !.
 
 
+% can_be_eaten(Board, )
 
-
-
-alphabeta(Board, 0, _, _, Score) :-
-    evaluate_board(Board, Score).
-
-%alphabeta(Board, Depth, Alpha, Beta, Score) :- 
-
-
-
-
-% make_a_move(Board, NewBoards) :-
-
-
+% b moves from 1 to 8
+% w moves from 8 to 1
