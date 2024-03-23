@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../application/board/board.dart';
 import '../../application/checker.dart';
 import '../../domain/constants.dart';
+import '../../domain/position_functions.dart';
 import '../../domain/typedefs.dart';
 import '../../util/coordinates_transform.dart';
 import '../visuals.dart';
@@ -59,14 +60,13 @@ class BoardCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pieceContained = this.pieceContained;
-    final isBlackCell = position.$1.isOdd ? position.$2.isEven : position.$2.isOdd;
 
     return AspectRatio(
       aspectRatio: 1 / 1,
       child: Container(
         decoration: BoxDecoration(
           border: border,
-          color: isBlackCell ? blackCellColor : null,
+          color: isBlackCell(position) ? blackCellColor : null,
         ),
         child: pieceContained != null
             ? Center(

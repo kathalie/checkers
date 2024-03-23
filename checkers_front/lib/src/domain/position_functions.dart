@@ -24,3 +24,6 @@ Position add({required Vector vector, required Position toPosition}) =>
 
 /// Multiplies the given [Vector] by the given [modifier].
 Vector multiply(Vector vec, int modifier) => (vec.$1 * modifier, vec.$2 * modifier);
+
+/// Whether the given [Position] is a black cell, where the checkers can be placed.
+bool isBlackCell(Position pos) => pos.$1.isOdd ? pos.$2.isEven : pos.$2.isOdd;
