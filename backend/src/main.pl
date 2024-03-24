@@ -53,12 +53,12 @@ wins(Board, w) :-
 
 % Move is impossible and the board is the same
 % move(+Cell, +RNew, +CNew, +Board, -NewBoard).
-move(_, RNew, CNew, Board, Board) :-
-    (
-        \+ is_valid(RNew); 
-        \+ is_valid(CNew);
-        checker(Board, RNew, CNew, _) % the cell is occupied!!!
-    ), !.
+% move(_, RNew, CNew, Board, Board) :-
+%     (
+%         \+ is_valid(RNew); 
+%         \+ is_valid(CNew);
+%         checker(Board, RNew, CNew, _) % the cell is occupied!!!
+%     ), !.
 
 % Move is possible and the board is updated
 % move(+Cell, +RNew, +CNew, +Board, -NewBoard).
@@ -100,6 +100,7 @@ eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)) :-
     are_in_diagonal(RW, CW, RB, CB).
 
 
+% Checker Ch eats checker ChToEat if possible and new board is generated. 
 % eat(+Ch, +ChToEat, +Board, -NewBoard).
 eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
     eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)),
@@ -107,23 +108,26 @@ eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
     vector(RW, RB, CW, CB, RVector, CVector),
     RDirection is sign(RVector), 
     CDirection is sign(CVector),
-    RNew is RW + RDirection * (abs(RVector) + 1), write(RNew),
-    CNew is CW + CDirection * (abs(CVector) + 1), write(CNew),
+    RNew is RW + RDirection * (abs(RVector) + 1),
+    CNew is CW + CDirection * (abs(CVector) + 1),
     % Move the checker to a new position.
     move(cell(ChW, RW, CW), RNew, CNew, Board, IntermediaryBoard),
     % Eat the checker and remove it from board.
     select(cell(ChB, RB, CB), IntermediaryBoard, NewBoard), 
     !. 
 
-eat(_, _, Board, Board) :- !.
+% Otherwise the same board is returned.
+% eat(_, _, Board, Board) :- !.
 
 
-
-% must_eat(Player, Board, NewBoards) :-
-%     player(Player, ChW),
-%     checker(Board, RW, CW, ChW),
-%     checker(Board, R, C, Ch),
-%     eat().
+% If player (white or black) has to eat, a checker is eaten 
+% and all such updated boards are generated.
+% must_eat(+Player, +Board, -NewBoards).
+must_eat(Player, Board, NewBoards) :-
+    player(Player, ChW),
+    checker(Board, RW, CW, ChW),
+    checker(Board, R, C, Ch),
+    eat(cell(ChW, RW, CW), cell(Ch, R, C), Board, NewBoards).
 
 
 
