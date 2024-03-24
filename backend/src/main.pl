@@ -26,7 +26,7 @@ promote(_, Ch, Ch) :- !.
 
 
 % Define what type of checker is located in the cell(Ch, R, C).
-% checker(+Board, +R, +C, -Ch)
+% checker(+Board, ?R, ?C, ?Ch)
 checker([cell(Ch, R, C) | _], R, C, Ch).
 checker([_ | RestOfBoard], R, C, Ch) :-
     checker(RestOfBoard, R, C, Ch).
@@ -89,15 +89,15 @@ are_in_diagonal(R1, C1, R2, C2) :-
 % Checks if Ch can eat ChToEat.
 % eatable(+Ch, +ChToEat, +Board).
 eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)) :-
+    opponent(ChW, ChB),
     \+ queen(ChW),
-    are_neighbours(RW, CW, RB, CB),
-    opponent(ChW, ChB).
+    are_neighbours(RW, CW, RB, CB).
 
 % eatable(+Ch, +ChToEat, +Board).
 eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)) :-
+    opponent(ChW, ChB),
     queen(ChW),
-    are_in_diagonal(RW, CW, RB, CB),
-    opponent(ChW, ChB).
+    are_in_diagonal(RW, CW, RB, CB).
 
 
 % eat(+Ch, +ChToEat, +Board, -NewBoard).
@@ -115,9 +115,15 @@ eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
     select(cell(ChB, RB, CB), IntermediaryBoard, NewBoard), 
     !. 
 
-% eat(_, _, Board, Board) :- !.
+eat(_, _, Board, Board) :- !.
 
 
+
+% must_eat(Player, Board, NewBoards) :-
+%     player(Player, ChW),
+%     checker(Board, RW, CW, ChW),
+%     checker(Board, R, C, Ch),
+%     eat().
 
 
 
