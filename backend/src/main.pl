@@ -120,8 +120,10 @@ eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
 
 
 
-% white moves from 7 to 0
-% black moves from 0 to 7
+% Generates all possible moves for a checker in the Cell.
+% w moves from 7 to 0.
+% b moves from 0 to 7.
+% move_forward(+Cell, +Board, -NewBoards).
 move_forward(cell(Ch, R, C), Board, NewBoards) :-
     \+ queen(Ch),
     (
@@ -144,18 +146,23 @@ move_forward(cell(Ch, R, C), Board, NewBoards) :-
     ).
 
 move_in_direction(X, Y, Dist, cell(Ch, R, C), Board, NewBoards) :-
-    RNew is R + X * Dist,
-    CNew is C + Y * Dist,
     (
+        % If there is space for a queen to move further, move.
         (
-            RNext is R + X * (Dist + 1),
-            CNext is C + Y * (Dist + 1),
-            put(cell(Ch, R, C), RNext, CNext, Board, _),
+            RAfterNew is R + X * (Dist + 1),
+            CAfterNew is C + Y * (Dist + 1),
+            put(cell(Ch, R, C), RAfterNew, CAfterNew, Board, _),
             NewDist is Dist + 1,
             move_in_direction(X, Y, NewDist, cell(Ch, R, C), Board, NewBoards)
         );
-        put(cell(Ch, R, C), RNew, CNew, Board, NewBoards)
+        % Otherwise, put it on the new position if possible.
+        (
+            RNew is R + X * Dist,
+            CNew is C + Y * Dist,
+            put(cell(Ch, R, C), RNew, CNew, Board, NewBoards)
+        )
     ).
+
 
 % If player (white or black) has to eat, a checker is eaten 
 % and all such updated boards are generated.
