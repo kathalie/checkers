@@ -52,8 +52,8 @@ wins(Board, w) :-
 
 
 % Move is impossible and the board is the same
-% move(+Cell, +RNew, +CNew, +Board, -NewBoard).
-% move(_, RNew, CNew, Board, Board) :-
+% put(+Cell, +RNew, +CNew, +Board, -NewBoard).
+% put(_, RNew, CNew, Board, Board) :-
 %     (
 %         \+ is_valid(RNew); 
 %         \+ is_valid(CNew);
@@ -61,8 +61,8 @@ wins(Board, w) :-
 %     ), !.
 
 % Move is possible and the board is updated
-% move(+Cell, +RNew, +CNew, +Board, -NewBoard).
-move(cell(Ch, R, C), RNew, CNew, Board, NewBoard) :-
+% put(+Cell, +RNew, +CNew, +Board, -NewBoard).
+put(cell(Ch, R, C), RNew, CNew, Board, NewBoard) :-
     is_valid(RNew), is_valid(CNew),
     \+ checker(Board, RNew, CNew, _),
     promote(RNew, Ch, ChNew),
@@ -111,13 +111,32 @@ eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
     RNew is RW + RDirection * (abs(RVector) + 1),
     CNew is CW + CDirection * (abs(CVector) + 1),
     % Move the checker to a new position.
-    move(cell(ChW, RW, CW), RNew, CNew, Board, IntermediaryBoard),
+    put(cell(ChW, RW, CW), RNew, CNew, Board, IntermediaryBoard),
     % Eat the checker and remove it from board.
     select(cell(ChB, RB, CB), IntermediaryBoard, NewBoard), 
     !. 
 
 % Otherwise the same board is returned.
 % eat(_, _, Board, Board) :- !.
+
+
+
+% white moves from 7 to 0
+% black moves from 0 to 7
+move_forward(cell(Ch, R, C), Board, NewBoards) :-
+    \+ queen(Ch),
+    (
+        (player(white, Ch), RNew is R - 1);
+        (player(black, Ch), RNew is R + 1)
+    ),
+    (
+        CNew is C + 1;
+        CNew is C - 1
+    ), 
+    put(cell(Ch, R, C), RNew, CNew, Board, NewBoards).
+
+
+
 
 
 % If player (white or black) has to eat, a checker is eaten 
@@ -130,6 +149,8 @@ must_eat(Player, Board, NewBoards) :-
     eat(cell(ChW, RW, CW), cell(Ch, R, C), Board, NewBoards).
 
 
+% all_forward_moves(Player, Board, NewBoards) :-
+%     player(Player, ChW),
+%     checker(Board, RW, CW, ChW),
+%     checker(Board, R, C, Ch),
 
-% b moves from 0 to 7
-% w moves from 7 to 0

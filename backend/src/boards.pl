@@ -52,6 +52,6 @@ board_q_eat([
 ]).
 
 board_eating([
-    cell(wq, 7, 1), cell(w, 2, 2), cell(w, 2, 6),
+    cell(wq, 7, 1), cell(w, 2, 2), cell(w, 2, 6), cell(w, 4, 0),
     cell(b, 3, 1), cell(b, 4, 4), cell(b, 3, 7)
 ]).
