@@ -3,6 +3,11 @@
 :- use_module(evaluation).
 :- use_module(utils).
 
+% Checks is column or row exists on a board.
+% is_valid(+CR).
+is_valid(CR) :-
+    CR >= 0, CR =<7, !.
+
 % Define two types of players and their possible pieces in the game.
 player(black, b).
 player(black, bq).
@@ -13,27 +18,12 @@ player(white, wq).
 queen(wq).
 queen(bq).
 
-% Checks if there is a winner.
-% wins(+Board, ?Ch).
-wins(Board, b) :-
-    \+ member(cell(w, _, _), Board),
-    \+ member(cell(wq, _, _), Board).
-    
-wins(Board, w) :-
-    \+ member(cell(b, _, _), Board),
-    \+ member(cell(bq, _, _), Board).
-
-% Checks if Ch1 is opponent of Ch2.
-% opponent(?Ch1, ?Ch2)
-opponent(Ch1, Ch2) :-
-    (player(black, Ch1), player(white, Ch2));
-    (player(white, Ch1), player(black, Ch1)).
-
 % A cheker becomes a queen when reaches the opposite edge of the board. Otherwise it is a still a simple checker.
 % promote(+R, +Ch, -CheckerOrQueen).
-promote(1, w, wq) :- !.
-promote(8, b, bq) :- !.
+promote(0, w, wq) :- !.
+promote(7, b, bq) :- !.
 promote(_, Ch, Ch) :- !.
+
 
 % Define what type of checker is located in the cell(Ch, R, C).
 % checker(+Board, +R, +C, -Ch)
@@ -41,8 +31,46 @@ checker([cell(Ch, R, C) | _], R, C, Ch).
 checker([_ | RestOfBoard], R, C, Ch) :-
     checker(RestOfBoard, R, C, Ch).
 
+
+% Checks if Ch1 is opponent of Ch2.
+% opponent(?Ch1, ?Ch2)
+opponent(Ch1, Ch2) :-
+    (player(black, Ch1), player(white, Ch2));
+    (player(white, Ch1), player(black, Ch2)).
+
+
+% Checks if there is a winner.
+% wins(+Board, ?Ch).
+wins(Board, b) :-
+    \+ member(cell(w, _, _), Board),
+    \+ member(cell(wq, _, _), Board).
+
+% wins(+Board, ?Ch).
+wins(Board, w) :-
+    \+ member(cell(b, _, _), Board),
+    \+ member(cell(bq, _, _), Board).
+
+
+% Move is impossible and the board is the same
+% move(+Cell, +RNew, +CNew, +Board, -NewBoard).
+move(_, RNew, CNew, Board, Board) :-
+    (
+        \+ is_valid(RNew); 
+        \+ is_valid(CNew);
+        checker(Board, RNew, CNew, _) % the cell is occupied!!!
+    ), !.
+
+% Move is possible and the board is updated
+% move(+Cell, +RNew, +CNew, +Board, -NewBoard).
+move(cell(Ch, R, C), RNew, CNew, Board, NewBoard) :-
+    is_valid(RNew), is_valid(CNew),
+    \+ checker(Board, RNew, CNew, _),
+    promote(RNew, Ch, ChNew),
+    replace(cell(Ch, R, C), Board, cell(ChNew, RNew, CNew), NewBoard), !.
+
+
 % Checks if checkers in cells (R1, C1) and (R2, C2) respectively have a corner in common.
-% are_neighbours(+R1, +C1, +R2, +C2)
+% are_neighbours(+R1, +C1, +R2, +C2).
 are_neighbours(R1, C1, R2, C2) :-
     RDiff = R1 - R2, 
     abs(RDiff) =:= 1,
@@ -50,44 +78,39 @@ are_neighbours(R1, C1, R2, C2) :-
     abs(CDiff) =:= 1, !.
 
 
-% move(+Cell, +NewRow, +NewCol, +Board, -NewBoard) 
-% Move is impossible and the board is the same
-move(_, NewRow, NewCol, Board, Board) :-
-    (
-        \+ is_valid(NewRow); 
-        \+ is_valid(NewCol);
-        checker(Board, NewRow, NewCol, _) % the cell is occupied!!!
-    ), !.
-
-% Move is possible and the board is updated
-move(cell(Ch, R, C), NewRow, NewCol, Board, NewBoard) :-
-    is_valid(NewRow), is_valid(NewCol),
-    promote(NewRow, Ch, NewChecker),
-    replace(cell(Ch, R, C), Board, cell(NewChecker, NewRow, NewCol), NewBoard), !.
-    
-
-% is_valid(+ColOrRow).
-% Checks is column or row exists on a board.
-is_valid(ColOrRow) :-
-    ColOrRow >= 0, ColOrRow =<7, !.
+% Checks if checkers in cells (R1, C1) and (R2, C2) respectively are on one diagonal.
+% are_in_diagonal(+R1, +C1, +R2, +C2).
+are_in_diagonal(R1, C1, R2, C2) :-
+    RDiff = R1 - R2,
+    CDiff = C1 - C2,
+    abs(RDiff) =:= abs(CDiff).
 
 
+% eat(+Ch, +ChToEat, +Board, -NewBoard).
+eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
+    \+ queen(ChW),
+    are_neighbours(RW, CW, RB, CB),
+    eat_helper(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard), !.
 
-% eat(+Ch, +CheckerToEat, +Board, -NewBoard)
-eat(cell(CheckerCurr, RowCurr, ColCurr), cell(CheckerEnemy, RowEnemy, ColEnemy), Board, NewBoard) :-
-    are_neighbours(RowCurr, ColCurr, RowEnemy, ColEnemy),
-    % checker(Board, RowCurr, ColCurr, CheckerCurr),
-    % checker(Board, RowEnemy, ColEnemy, CheckerEnemy),
-    opponent(CheckerCurr, CheckerEnemy),
+% eat(+Ch, +ChToEat, +Board, -NewBoard).
+eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
+    queen(ChW),
+    are_in_diagonal(RW, CW, RB, CB),
+    eat_helper(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard), !.
+
+% eat_helper(+Ch, +ChToEat, +Board, -NewBoard).
+eat_helper(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
+    opponent(ChW, ChB),
     % Define direction to move the checker.
-    HVector is RowEnemy - RowCurr,
-    VVector is ColEnemy - ColCurr,
-    NewRow is RowCurr + 2 * HVector, is_valid(NewRow),
-    NewCol is ColCurr + 2 * VVector, is_valid(NewCol),
+    vector(RW, RB, CW, CB, RVector, CVector),
+    RDirection is sign(RVector), 
+    CDirection is sign(CVector),
+    RNew is RW + RDirection * (abs(RVector) + 1), write(RNew),
+    CNew is CW + CDirection * (abs(CVector) + 1), write(CNew),
     % Move the checker to a new position.
-    move(cell(CheckerCurr, RowCurr, ColCurr), NewRow, NewCol, Board, IntermediaryBoard),
+    move(cell(ChW, RW, CW), RNew, CNew, Board, IntermediaryBoard),
     % Eat the checker and remove it from board.
-    select(cell(CheckerEnemy, RowEnemy, ColEnemy), IntermediaryBoard, NewBoard), 
+    select(cell(ChB, RB, CB), IntermediaryBoard, NewBoard), 
     !. 
 
 % eat(_, _, Board, Board) :- !.
@@ -95,5 +118,5 @@ eat(cell(CheckerCurr, RowCurr, ColCurr), cell(CheckerEnemy, RowEnemy, ColEnemy),
 
 % can_be_eaten(Board, )
 
-% b moves from 1 to 8
-% w moves from 8 to 1
+% b moves from 0 to 7
+% w moves from 7 to 0

@@ -1,4 +1,12 @@
-:- module(boards, [initial_board/1, board2/1, board_w_wins/1, board_eat/1, board_eat2/1, board_cannot_eat/1, board_cannot_eat2/1]).
+:- module(boards, [
+    initial_board/1, 
+    board2/1, 
+    board_w_wins/1, 
+    board_eat/1, 
+    board_eat2/1, 
+    board_cannot_eat/1, 
+    board_cannot_eat2/1,
+    board_q_eat/1]).
 
 initial_board([
     cell(b, 0, 0), cell(b, 0, 2), cell(b, 0, 4), cell(b, 0, 6),
@@ -36,4 +44,8 @@ board_cannot_eat([
 
 board_cannot_eat2([
     cell(w, 2, 5), cell(w, 1, 4)
+]).
+
+board_q_eat([
+    cell(wq, 7, 1), cell(b, 4, 4)
 ]).
