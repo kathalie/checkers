@@ -12,6 +12,7 @@ class GameDriverNotifier extends _$GameDriverNotifier {
   @override
   GameDriver build() {
     ref.keepAlive();
+    ref.onDispose(() => state.dispose());
 
     final (white, black) = ref.watch(handlesNotifierProvider);
 

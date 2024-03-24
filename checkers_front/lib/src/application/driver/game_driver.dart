@@ -3,6 +3,7 @@ import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
 import '../board/board.dart';
 import '../checker.dart';
+import 'handles/real_player_handle.dart';
 import 'player_handle.dart';
 
 class GameDriver {
@@ -27,6 +28,11 @@ class GameDriver {
 
   PlayerHandle get currentHandle =>
       _currentPlayerColor == CheckerColor.white ? _handles.white : _handles.black;
+
+  void dispose() {
+    final (:white, :black) = _handles;
+    [black, white].whereType<RealPlayerHandle>().forEach((handle) => handle.dispose());
+  }
 
   void _switchTurn() {
     _currentPlayerColor = _currentPlayerColor.flip();
