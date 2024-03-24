@@ -7,7 +7,8 @@
     board_cannot_eat/1, 
     board_cannot_eat2/1,
     board_q_eat/1,
-    board_eating/1]).
+    board_eating/1,
+    board_q_move/1]).
 
 initial_board([
     cell(b, 0, 0), cell(b, 0, 2), cell(b, 0, 4), cell(b, 0, 6),
@@ -53,5 +54,11 @@ board_q_eat([
 
 board_eating([
     cell(wq, 7, 1), cell(w, 2, 2), cell(w, 2, 6), cell(w, 4, 0),
+    cell(b, 3, 1), cell(b, 4, 4), cell(b, 3, 7)
+]).
+
+board_q_move([
+    cell(wq, 7, 1), cell(w, 2, 2), cell(w, 2, 6), cell(w, 4, 0),
+    cell(wq, 4, 0),
     cell(b, 3, 1), cell(b, 4, 4), cell(b, 3, 7)
 ]).

@@ -81,9 +81,8 @@ are_neighbours(R1, C1, R2, C2) :-
 % Checks if checkers in cells (R1, C1) and (R2, C2) respectively are on one diagonal.
 % are_in_diagonal(+R1, +C1, +R2, +C2).
 are_in_diagonal(R1, C1, R2, C2) :-
-    RDiff = R1 - R2,
-    CDiff = C1 - C2,
-    abs(RDiff) =:= abs(CDiff).
+    vector(R1, R2, C1, C2, X, Y),
+    is_diagonal_vector(X, Y).
 
 
 % Checks if Ch can eat ChToEat.
@@ -135,9 +134,28 @@ move_forward(cell(Ch, R, C), Board, NewBoards) :-
     ), 
     put(cell(Ch, R, C), RNew, CNew, Board, NewBoards).
 
+move_forward(cell(Ch, R, C), Board, NewBoards) :-
+    queen(Ch),
+    (
+        move_in_direction(1, 1, 1, cell(Ch, R, C), Board, NewBoards);
+        move_in_direction(-1, 1, 1, cell(Ch, R, C), Board, NewBoards);
+        move_in_direction(1, -1, 1, cell(Ch, R, C), Board, NewBoards);
+        move_in_direction(-1, -1, 1, cell(Ch, R, C), Board, NewBoards)
+    ).
 
-
-
+move_in_direction(X, Y, Dist, cell(Ch, R, C), Board, NewBoards) :-
+    RNew is R + X * Dist,
+    CNew is C + Y * Dist,
+    (
+        (
+            RNext is R + X * (Dist + 1),
+            CNext is C + Y * (Dist + 1),
+            put(cell(Ch, R, C), RNext, CNext, Board, _),
+            NewDist is Dist + 1,
+            move_in_direction(X, Y, NewDist, cell(Ch, R, C), Board, NewBoards)
+        );
+        put(cell(Ch, R, C), RNew, CNew, Board, NewBoards)
+    ).
 
 % If player (white or black) has to eat, a checker is eaten 
 % and all such updated boards are generated.
