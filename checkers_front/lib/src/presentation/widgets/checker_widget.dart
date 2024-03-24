@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../application/checker.dart';
+import '../../application/driver/handles/real_player_handle.dart';
 import '../../application/providers/game_driver_provider.dart';
-import '../../application/providers/highlight_notifier.dart';
+import '../../application/providers/possible_moves_notifier.dart';
 import '../../domain/constants.dart';
 import '../../domain/typedefs.dart';
 
@@ -24,7 +25,7 @@ class CheckerWidget extends ConsumerWidget {
     const innerPieceFraction = 0.7;
     const opacityWhenDragging = 0.3;
 
-    final currentPlayer = ref.watch(gameDriverNotifierProvider).currentPlayer;
+    final currentHandle = ref.watch(gameDriverNotifierProvider).currentHandle;
 
     final (outerColor, innerColor) = checker.color.displayColors;
 
@@ -38,14 +39,16 @@ class CheckerWidget extends ConsumerWidget {
       ),
     );
 
-    if (checker.color == currentPlayer) {
-      return Draggable(
+    if (currentHandle is RealPlayerHandle && checker.color == currentHandle.color) {
+      return Draggable<Checker>(
         onDragStarted: () {
-          ref.read(highlightNotifierProvider.notifier).updateHighlightFor(position);
+          ref.read(possibleMovesNotifierProvider.notifier).updateMovesFor(position);
         },
         onDragEnd: (details) {
-          ref.read(highlightNotifierProvider.notifier).reset();
+          ref.read(possibleMovesNotifierProvider.notifier).reset();
         },
+        data: checker,
+        maxSimultaneousDrags: 1,
         feedback: child,
         childWhenDragging: Opacity(
           opacity: opacityWhenDragging,

@@ -10,9 +10,11 @@ const _cannotMove = CannotMove();
 mixin BoardMixin on Board {
   @override
   bool isValidPosition(Position position) {
+    bool isValidIndex(int index) => index >= 0 && index < boardSide;
+
     final (row, col) = position;
 
-    return _isValidIndex(row) && _isValidIndex(col);
+    return isValidIndex(row) && isValidIndex(col);
   }
 
   @override
@@ -31,20 +33,14 @@ mixin BoardMixin on Board {
     }
 
     final vec = vector(from: from, to: to);
-    if (!isDiagonal(vec) || !checker.canMoveTo(row: to.$1, fromRow: from.$1)) {
+    if (!isDiagonal(vec)) {
       return _cannotMove;
-    }
-
-    final length = diagonalVectorLength(vec);
-
-    if (length == 1) {
-      return CanMove(from: from, to: to);
     }
 
     final firstCheckerBetween = _firstCheckerBetween(from, to);
 
     if (firstCheckerBetween == null) {
-      return checker.isKing ? CanMove(from: from, to: to) : _cannotMove;
+      return checker.canMove(from: from, to: to) ? CanMove(from: from, to: to) : _cannotMove;
     }
 
     final (other, otherPos) = firstCheckerBetween;
@@ -58,11 +54,15 @@ mixin BoardMixin on Board {
   }
 
   @override
-  Iterable<MoveMode> possibleMoves({required Position from}) =>
+  Iterable<CanMoveOrBeat> possibleMoves({required Position from}) =>
       this[from]
           ?.possibleTargets(fromPosition: from, board: this)
-          .map((target) => moveMode(from: from, to: target)) ??
+          .map((target) => moveMode(from: from, to: target))
+          .whereType<CanMoveOrBeat>() ??
       [];
+
+  @override
+  Iterable<MustBeat> mustBeatAt(Position pos) => possibleMoves(from: pos).whereType<MustBeat>();
 
   (Checker, Position)? _firstCheckerBetween(Position pos1, Position pos2) {
     final direction = directionOf(vector(from: pos1, to: pos2));
@@ -80,6 +80,4 @@ mixin BoardMixin on Board {
 
     return null;
   }
-
-  bool _isValidIndex(int index) => index >= 0 && index < boardSide;
 }

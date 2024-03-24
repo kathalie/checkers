@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../application/driver/handles/mock_handle.dart';
 import 'game_widget.dart';
 
 class MainPage extends ConsumerWidget {
@@ -13,10 +12,7 @@ class MainPage extends ConsumerWidget {
       body: SafeArea(
         minimum: EdgeInsets.all(16),
         child: Center(
-          child: GameWidget(
-            playerHandle: MockHandle(),
-            enemyHandle: MockHandle(),
-          ),
+          child: GameWidget(),
         ),
       ),
     );

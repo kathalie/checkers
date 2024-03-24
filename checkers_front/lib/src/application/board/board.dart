@@ -7,9 +7,15 @@ abstract interface class Board {
 
   void operator []=(Position pos, Checker? checker);
 
+  Iterable<Position> get whites;
+
+  Iterable<Position> get blacks;
+
   MoveMode moveMode({required Position from, required Position to});
 
-  Iterable<MoveMode> possibleMoves({required Position from});
+  Iterable<CanMoveOrBeat> possibleMoves({required Position from});
+
+  Iterable<MustBeat> mustBeatAt(Position pos);
 
   bool isValidPosition(Position position);
 }

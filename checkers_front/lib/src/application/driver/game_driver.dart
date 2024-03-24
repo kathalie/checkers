@@ -7,7 +7,7 @@ import 'player_handle.dart';
 
 class GameDriver {
   final Board board;
-  final List<PlayerHandle> _handles;
+  final ({PlayerHandle white, PlayerHandle black}) _handles;
   CheckerColor _currentPlayerColor = CheckerColor.white;
   Position? _lastMoved;
 
@@ -16,21 +16,17 @@ class GameDriver {
 
   GameDriver(
     this.board, {
-    required PlayerHandle p1Handle,
-    required PlayerHandle p2Handle,
-  }) : _handles = List.unmodifiable([p1Handle, p2Handle]);
-
-  /// Returns a copy of this [GameDriver].
-  GameDriver copy() {
-    return GameDriver(board, p1Handle: _handles.first, p2Handle: _handles.last)
-      .._currentPlayerColor = _currentPlayerColor
-      .._lastMoved = _lastMoved;
-  }
+    required PlayerHandle whiteHandle,
+    required PlayerHandle blackHandle,
+  }) : _handles = (white: whiteHandle, black: blackHandle);
 
   CheckerColor get currentPlayer => _currentPlayerColor;
 
-  PlayerHandle get _currentHandle =>
-      _currentPlayerColor == CheckerColor.white ? _handles.first : _handles.last;
+  Iterable<Position> get currentPlayerPositions =>
+      currentPlayer == CheckerColor.white ? board.whites : board.blacks;
+
+  PlayerHandle get currentHandle =>
+      _currentPlayerColor == CheckerColor.white ? _handles.white : _handles.black;
 
   void _switchTurn() {
     _currentPlayerColor = _currentPlayerColor.flip();
@@ -49,9 +45,8 @@ class GameDriver {
   }
 
   Future<void> step() async {
-    final Movement(:from, :to) = await _currentHandle.takeTurn(
+    final Movement(:from, :to) = await currentHandle.takeTurn(
       board: board,
-      color: _currentPlayerColor,
       lastMoved: _lastMoved,
     );
 
@@ -79,7 +74,7 @@ class GameDriver {
 
         _onMoved();
 
-        if (!_mustBeatAt(to)) {
+        if (board.mustBeatAt(to).isEmpty) {
           _switchTurn();
         }
       default:
@@ -104,8 +99,6 @@ class GameDriver {
 
     board[pos] = Checker(color: checker.color, isKing: true);
   }
-
-  bool _mustBeatAt(Position pos) => board.possibleMoves(from: pos).whereType<MustBeat>().isNotEmpty;
 
   void _validateCheckerAt(Position pos) {
     final checker = board[pos];

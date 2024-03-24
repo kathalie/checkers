@@ -5,17 +5,18 @@ import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
 import 'game_driver_provider.dart';
 
-part 'highlight_notifier.g.dart';
+part 'possible_moves_notifier.g.dart';
 
 @riverpod
-class HighlightNotifier extends _$HighlightNotifier {
+class PossibleMovesNotifier extends _$PossibleMovesNotifier {
   @override
-  IList<MoveMode> build() => <MoveMode>[].lock;
+  IList<CanMoveOrBeat> build() => <CanMoveOrBeat>[].lock;
 
-  void reset() => state = <MoveMode>[].lock;
+  void reset() => state = <CanMoveOrBeat>[].lock;
 
-  void updateHighlightFor(Position pos) {
-    final board = ref.read(gameDriverNotifierProvider).board;
+  void updateMovesFor(Position pos) {
+    final gameDriver = ref.read(gameDriverNotifierProvider);
+    final board = gameDriver.board;
     final checker = board[pos];
 
     if (checker == null) {
@@ -27,6 +28,11 @@ class HighlightNotifier extends _$HighlightNotifier {
     final mustBeat = moves.whereType<MustBeat>();
     if (mustBeat.isNotEmpty) {
       state = mustBeat.toList(growable: false).lock;
+      return;
+    }
+
+    if (gameDriver.currentPlayerPositions.any((pos) => board.mustBeatAt(pos).isNotEmpty)) {
+      state = <CanMoveOrBeat>[].lock;
       return;
     }
 

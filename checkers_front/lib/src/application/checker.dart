@@ -28,8 +28,20 @@ class Checker {
         .where(board.isValidPosition);
   }
 
-  bool canMoveTo({required int row, required int fromRow}) =>
-      isKing || color == CheckerColor.black ? fromRow < row : fromRow > row;
+  /// Whether this checker can go from [from] to [to].
+  ///
+  /// It only checks the direction and distance, and not obstacles.
+  /// It also does not account for the situations when a checker cab beat backwards.
+  bool canMove({required Position to, required Position from}) {
+    if (isKing) {
+      return true;
+    }
+
+    final (fromRow, toRow) = (from.$1, to.$1);
+
+    return (color == CheckerColor.black ? fromRow < toRow : fromRow > toRow) &&
+        diagonalDistanceBetween(from, to) == 1;
+  }
 
   @override
   bool operator ==(Object other) =>
