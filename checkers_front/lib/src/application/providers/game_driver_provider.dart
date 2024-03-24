@@ -1,17 +1,30 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../board/board.dart';
+import '../board/board_generator.dart';
+import '../board/board_impl.dart';
 import '../driver/game_driver.dart';
-import '../driver/player_handle.dart';
+import '../driver/handles/mock_handle.dart';
+import 'handles_provider.dart';
 
 part 'game_driver_provider.g.dart';
 
 @riverpod
 class GameDriverNotifier extends _$GameDriverNotifier {
   @override
-  GameDriver build(Board board, PlayerHandle p1Handle, PlayerHandle p2Handle) {
+  GameDriver build() {
     ref.keepAlive();
-    return GameDriver(board, p1Handle: p1Handle, p2Handle: p2Handle);
+
+    final (p1Handle, p2Handle) = ref.watch(handlesProviderNotifierProvider) ??
+        (
+          const MockHandle(),
+          const MockHandle(),
+        );
+
+    return GameDriver(
+      BoardImpl(generateInitialBoard()),
+      p1Handle: p1Handle,
+      p2Handle: p2Handle,
+    );
   }
 
   Future<void> step() async {

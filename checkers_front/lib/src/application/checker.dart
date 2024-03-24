@@ -1,12 +1,15 @@
+import 'package:collection/collection.dart';
+
 import '../domain/constants.dart';
 import '../domain/constraints/checker_color.dart';
 import '../domain/position_functions.dart';
 import '../domain/typedefs.dart';
 import 'board/board.dart';
 
-const _manDirections = [(-1, -1), (1, 1), (-1, 1), (1, -1)];
+const _directions = [(-1, -1), (1, 1), (-1, 1), (1, -1)];
+final _manDirections = [_directions, _directions.map((vec) => multiply(vec, 2))].flattened;
 final _kingDirections = List.generate(boardSide, (index) => index + 1)
-    .expand((dist) => _manDirections.map((vec) => multiply(vec, dist)));
+    .expand((dist) => _directions.map((vec) => multiply(vec, dist)));
 
 class Checker {
   final CheckerColor color;
@@ -24,6 +27,9 @@ class Checker {
         .map((dir) => add(vector: dir, toPosition: pos))
         .where(board.isValidPosition);
   }
+
+  bool canMoveTo({required int row, required int fromRow}) =>
+      isKing || color == CheckerColor.black ? fromRow < row : fromRow > row;
 
   @override
   bool operator ==(Object other) =>

@@ -5,7 +5,6 @@ import '../../domain/typedefs.dart';
 import '../checker.dart';
 import 'board.dart';
 
-const _canMove = CanMove();
 const _cannotMove = CannotMove();
 
 mixin BoardMixin on Board {
@@ -32,31 +31,38 @@ mixin BoardMixin on Board {
     }
 
     final vec = vector(from: from, to: to);
-    if (!isDiagonal(vec)) {
+    if (!isDiagonal(vec) || !checker.canMoveTo(row: to.$1, fromRow: from.$1)) {
       return _cannotMove;
     }
 
     final length = diagonalVectorLength(vec);
 
     if (length == 1) {
-      return _canMove;
+      return CanMove(from: from, to: to);
     }
 
     final firstCheckerBetween = _firstCheckerBetween(from, to);
 
     if (firstCheckerBetween == null) {
-      return checker.isKing ? _canMove : _cannotMove;
+      return checker.isKing ? CanMove(from: from, to: to) : _cannotMove;
     }
 
-    final (other, pos) = firstCheckerBetween;
+    final (other, otherPos) = firstCheckerBetween;
 
     if (other.color != checker.color &&
-        (checker.isKing || diagonalDistanceBetween(from, pos) == 2)) {
-      return MustBeat(at: pos);
+        (checker.isKing || diagonalDistanceBetween(from, to) == 2)) {
+      return MustBeat(from: from, to: to, at: otherPos);
     }
 
     return _cannotMove;
   }
+
+  @override
+  Iterable<MoveMode> possibleMoves({required Position from}) =>
+      this[from]
+          ?.possibleTargets(fromPosition: from, board: this)
+          .map((target) => moveMode(from: from, to: target)) ??
+      [];
 
   (Checker, Position)? _firstCheckerBetween(Position pos1, Position pos2) {
     final direction = directionOf(vector(from: pos1, to: pos2));

@@ -9,5 +9,7 @@ abstract interface class Board {
 
   MoveMode moveMode({required Position from, required Position to});
 
+  Iterable<MoveMode> possibleMoves({required Position from});
+
   bool isValidPosition(Position position);
 }

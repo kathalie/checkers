@@ -6,7 +6,7 @@ import '../checker.dart';
 import 'player_handle.dart';
 
 class GameDriver {
-  final Board _board;
+  final Board board;
   final List<PlayerHandle> _handles;
   CheckerColor _currentPlayerColor = CheckerColor.white;
   Position? _lastMoved;
@@ -15,17 +15,19 @@ class GameDriver {
   void Function()? onStepEnded;
 
   GameDriver(
-    this._board, {
+    this.board, {
     required PlayerHandle p1Handle,
     required PlayerHandle p2Handle,
   }) : _handles = List.unmodifiable([p1Handle, p2Handle]);
 
   /// Returns a copy of this [GameDriver].
   GameDriver copy() {
-    return GameDriver(_board, p1Handle: _handles.first, p2Handle: _handles.last)
+    return GameDriver(board, p1Handle: _handles.first, p2Handle: _handles.last)
       .._currentPlayerColor = _currentPlayerColor
       .._lastMoved = _lastMoved;
   }
+
+  CheckerColor get currentPlayer => _currentPlayerColor;
 
   PlayerHandle get _currentHandle =>
       _currentPlayerColor == CheckerColor.white ? _handles.first : _handles.last;
@@ -48,14 +50,14 @@ class GameDriver {
 
   Future<void> step() async {
     final Movement(:from, :to) = await _currentHandle.takeTurn(
-      board: _board,
+      board: board,
       color: _currentPlayerColor,
       lastMoved: _lastMoved,
     );
 
     _validateCheckerAt(from);
 
-    final moveMode = _board.moveMode(from: from, to: to);
+    final moveMode = board.moveMode(from: from, to: to);
 
     switch (moveMode) {
       case CannotMove():
@@ -68,56 +70,45 @@ class GameDriver {
         _onMoved();
         _switchTurn();
       case MustBeat(:final at):
-        if (_board[at] == null) {
+        if (board[at] == null) {
           throw StateError('Cannot beat a missing checker at $at');
         }
         _move(from: from, to: to);
-        _board[at] = null;
+        board[at] = null;
         // todo score
 
         _onMoved();
 
-        if (!_canBeatAt(to)) {
+        if (!_mustBeatAt(to)) {
           _switchTurn();
         }
+      default:
+        throw StateError('Something went terribly wrong with MoveMode switch');
     }
 
     onStepEnded?.call();
   }
 
   void _move({required Position from, required Position to}) {
-    _board[to] = _board[from];
-    _board[from] = null;
+    board[to] = board[from];
+    board[from] = null;
     _lastMoved = to;
   }
 
   void _promoteAt(Position pos) {
-    final checker = _board[pos];
+    final checker = board[pos];
 
     if (checker == null || checker.isKing) {
       return;
     }
 
-    _board[pos] = Checker(color: checker.color, isKing: true);
+    board[pos] = Checker(color: checker.color, isKing: true);
   }
 
-  bool _canBeatAt(Position pos) {
-    final checker = _board[pos];
-
-    if (checker == null) {
-      return false;
-    }
-
-    final targets = checker
-        .possibleTargets(fromPosition: pos, board: _board)
-        .map((target) => _board.moveMode(from: pos, to: target))
-        .whereType<MustBeat>();
-
-    return targets.isNotEmpty;
-  }
+  bool _mustBeatAt(Position pos) => board.possibleMoves(from: pos).whereType<MustBeat>().isNotEmpty;
 
   void _validateCheckerAt(Position pos) {
-    final checker = _board[pos];
+    final checker = board[pos];
 
     if (checker == null) {
       throw StateError(
