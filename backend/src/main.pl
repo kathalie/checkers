@@ -86,21 +86,23 @@ are_in_diagonal(R1, C1, R2, C2) :-
     abs(RDiff) =:= abs(CDiff).
 
 
-% eat(+Ch, +ChToEat, +Board, -NewBoard).
-eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
+% Checks if Ch can eat ChToEat.
+% eatable(+Ch, +ChToEat, +Board).
+eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)) :-
     \+ queen(ChW),
     are_neighbours(RW, CW, RB, CB),
-    eat_helper(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard), !.
+    opponent(ChW, ChB).
+
+% eatable(+Ch, +ChToEat, +Board).
+eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)) :-
+    queen(ChW),
+    are_in_diagonal(RW, CW, RB, CB),
+    opponent(ChW, ChB).
+
 
 % eat(+Ch, +ChToEat, +Board, -NewBoard).
 eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
-    queen(ChW),
-    are_in_diagonal(RW, CW, RB, CB),
-    eat_helper(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard), !.
-
-% eat_helper(+Ch, +ChToEat, +Board, -NewBoard).
-eat_helper(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
-    opponent(ChW, ChB),
+    eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)),
     % Define direction to move the checker.
     vector(RW, RB, CW, CB, RVector, CVector),
     RDirection is sign(RVector), 
@@ -116,7 +118,8 @@ eat_helper(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
 % eat(_, _, Board, Board) :- !.
 
 
-% can_be_eaten(Board, )
+
+
 
 % b moves from 0 to 7
 % w moves from 7 to 0
