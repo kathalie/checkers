@@ -51,15 +51,6 @@ wins(Board, w) :-
     \+ member(cell(bq, _, _), Board).
 
 
-% Move is impossible and the board is the same
-% put(+Cell, +RNew, +CNew, +Board, -NewBoard).
-% put(_, RNew, CNew, Board, Board) :-
-%     (
-%         \+ is_valid(RNew); 
-%         \+ is_valid(CNew);
-%         checker(Board, RNew, CNew, _) % the cell is occupied!!!
-%     ), !.
-
 % Move is possible and the board is updated
 % put(+Cell, +RNew, +CNew, +Board, -NewBoard).
 put(cell(Ch, R, C), RNew, CNew, Board, NewBoard) :-
@@ -115,10 +106,6 @@ eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
     select(cell(ChB, RB, CB), IntermediaryBoard, NewBoard), 
     !. 
 
-% Otherwise the same board is returned.
-% eat(_, _, Board, Board) :- !.
-
-
 
 % Generates all possible moves for a checker in the Cell.
 % w moves from 7 to 0.
@@ -164,7 +151,7 @@ move_in_direction(X, Y, Dist, cell(Ch, R, C), Board, NewBoards) :-
     ).
 
 
-% If player (white or black) has to eat, a checker is eaten 
+% If Player (white or black) has to eat, a checker is eaten 
 % and all such updated boards are generated.
 % must_eat(+Player, +Board, -NewBoards).
 must_eat(Player, Board, NewBoards) :-
@@ -173,9 +160,22 @@ must_eat(Player, Board, NewBoards) :-
     checker(Board, R, C, Ch),
     eat(cell(ChW, RW, CW), cell(Ch, R, C), Board, NewBoards).
 
+% Finds all the possible forward moves without eating checkers
+% for Player (white, black).
+% possible_forward_moves(+Player, +Board, -NewBoards).
+possible_forward_moves(Player, Board, NewBoards) :-
+    player(Player, Ch),
+    checker(Board, R, C, Ch),
+    move_forward(cell(Ch, R, C), Board, NewBoards).
 
-% all_forward_moves(Player, Board, NewBoards) :-
-%     player(Player, ChW),
-%     checker(Board, RW, CW, ChW),
-%     checker(Board, R, C, Ch),
-
+% Finds all the possible actions moves for Player (white, black).
+% If Player can eat opponent's checker, it becomes obligatory and all the variants 
+% of eating opponent's checkers are generated.
+% Otherwise, possible moves for simple checkers are generated.
+% possible_forward_moves(+Player, +Board, -NewBoards).
+possible_actions(Player, Board, NewBoards) :-
+    must_eat(Player, Board, NewBoards);
+    (
+        \+ must_eat(Player, Board, _),
+        possible_forward_moves(Player, Board, NewBoards)
+    ).
