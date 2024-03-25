@@ -32,9 +32,7 @@ class PrologPlayerService {
     final res = await http.post(
       _serviceUri.resolve(_bestMoveEndpoint),
       body: BoardStateDto.represent(depth: depth, board: board).toJson(),
-      headers: {
-        HttpHeaders.contentTypeHeader: ContentType.json.mimeType
-      },
+      headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
     );
 
     print(res.body);

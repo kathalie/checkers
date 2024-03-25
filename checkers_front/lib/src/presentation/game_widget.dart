@@ -18,9 +18,7 @@ class _GameWidgetState extends ConsumerState<GameWidget> {
   GameDriver get _driver => ref.read(gameDriverProvider);
 
   int get _depth =>
-      ref
-          .read(sessionSettingsNotifierProvider)
-          .aiDifficulties[_driver.currentPlayer]!;
+      ref.read(sessionSettingsNotifierProvider).aiDifficulties[_driver.currentPlayer]!;
 
   @override
   void initState() {
@@ -82,7 +80,8 @@ class _GameWidgetState extends ConsumerState<GameWidget> {
               alignment: Alignment.center,
               child: Opacity(
                 opacity: 0.6,
-                child: child,),
+                child: child,
+              ),
             ),
             Align(
               alignment: Alignment.center,

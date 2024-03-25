@@ -5,9 +5,8 @@ import '../board/board_impl.dart';
 import '../driver/game_driver.dart';
 import 'handles_notifier.dart';
 
-final gameDriverProvider = ChangeNotifierProvider((ref) {
-  final (:white, :black) = ref.read(handlesNotifierProvider);
-  print('white $white black $black');
+final gameDriverProvider = AutoDisposeChangeNotifierProvider((ref) {
+  final (:white, :black) = ref.watch(handlesNotifierProvider);
 
   final gameDriver = GameDriver(
     BoardImpl(generateInitialBoard()),

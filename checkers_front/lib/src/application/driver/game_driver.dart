@@ -5,7 +5,6 @@ import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
 import '../board/board.dart';
 import '../checker.dart';
-import 'handles/real_player_handle.dart';
 import 'player_handle.dart';
 
 class GameDriver extends ChangeNotifier {
@@ -33,16 +32,26 @@ class GameDriver extends ChangeNotifier {
 
   bool get isGameOver => board.whites.isEmpty || board.blacks.isEmpty;
 
-  @override
-  void dispose() {
-    final (:white, :black) = _handles;
-    [black, white].whereType<RealPlayerHandle>().forEach((handle) => handle.dispose());
-    super.dispose();
-  }
-
   void _switchTurn() {
     _currentPlayerColor = _currentPlayerColor.flipped();
     _lastMoved = null;
+  }
+
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (_isDisposed) {
+      return;
+    }
+
+    super.notifyListeners();
   }
 
   /// Is called when the movement has been made, but the current turn is not over yet.
@@ -97,8 +106,6 @@ class GameDriver extends ChangeNotifier {
         }
         _move(from: from, to: to);
         board[at] = null;
-        // todo score
-
         _onMoved();
 
         if (board.mustBeatAt(to).isEmpty) {

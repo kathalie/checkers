@@ -151,7 +151,7 @@ class _PlayerSelector extends ConsumerWidget {
       return child;
     }
 
-    const depths = [2, 5, 10];
+    const depths = [3, 5, 10];
     const labels = ['Beginner', 'Master', 'Pro'];
     final currentValue = settings.aiDifficulties[color]!;
 
