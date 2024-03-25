@@ -6,6 +6,7 @@ import '../application/driver/handles/real_player_handle.dart';
 import '../application/driver/player_handle.dart';
 import '../application/providers/handles_notifier.dart';
 import '../domain/constraints/checker_color.dart';
+import 'settings_page.dart';
 import 'widgets/checker_widget.dart';
 import 'game_page.dart';
 
@@ -23,6 +24,14 @@ class MainPage extends ConsumerWidget {
     );
   }
 
+  void _openSettings(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SettingsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const padding = 16.0;
@@ -32,6 +41,10 @@ class MainPage extends ConsumerWidget {
     final (:white, :black) = ref.watch(handlesNotifierProvider);
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _openSettings(context),
+        child: const Icon(Icons.settings),
+      ),
       body: SafeArea(
         minimum: const EdgeInsets.all(safeArea),
         child: Center(

@@ -5,7 +5,11 @@ part 'highlight_assist_provider.g.dart';
 @riverpod
 class HighlightAssistNotifier extends _$HighlightAssistNotifier {
   @override
-  bool build() => true;
+  bool build() {
+    ref.keepAlive();
+
+    return true;
+  }
 
   void toggle() => state = !state;
 }
