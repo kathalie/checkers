@@ -3,7 +3,8 @@
     game_over/1,
     wins/2,
     player/2,
-    opponent/2
+    opponent/2,
+    checker/5
 ]).
 
 :- use_module(boards).
