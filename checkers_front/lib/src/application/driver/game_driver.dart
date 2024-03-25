@@ -31,11 +31,13 @@ class GameDriver extends ChangeNotifier {
   PlayerHandle get currentHandle =>
       _currentPlayerColor == CheckerColor.white ? _handles.white : _handles.black;
 
+  bool get isGameOver => board.whites.isEmpty || board.blacks.isEmpty;
+
   @override
   void dispose() {
-    super.dispose();
     final (:white, :black) = _handles;
     [black, white].whereType<RealPlayerHandle>().forEach((handle) => handle.dispose());
+    super.dispose();
   }
 
   void _switchTurn() {
@@ -55,11 +57,21 @@ class GameDriver extends ChangeNotifier {
   }
 
   Future<void> step(int depth) async {
-    final Movement(:from, :to) = await currentHandle.takeTurn(
-      board: board,
-      lastMoved: _lastMoved,
-      depth: depth,
-    );
+    late final Position from;
+    late final Position to;
+
+    try {
+      final movement = await currentHandle.takeTurn(
+        board: board,
+        lastMoved: _lastMoved,
+        depth: depth,
+      );
+
+      from = movement.from;
+      to = movement.to;
+    } catch (err) {
+      return;
+    }
 
     _validateCheckerAt(from);
 

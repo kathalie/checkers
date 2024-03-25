@@ -14,7 +14,5 @@ final gameDriverProvider = ChangeNotifierProvider((ref) {
     blackHandle: black,
   );
 
-  ref.onDispose(() => gameDriver.dispose());
-
   return gameDriver;
 });

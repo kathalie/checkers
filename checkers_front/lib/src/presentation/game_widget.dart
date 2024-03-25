@@ -5,6 +5,7 @@ import '../application/driver/game_driver.dart';
 import '../application/providers/game_driver_provider.dart';
 import '../application/providers/session_settings_notifier.dart';
 import 'widgets/board_widget.dart';
+import 'widgets/checker_widget.dart';
 
 class GameWidget extends ConsumerStatefulWidget {
   const GameWidget({super.key});
@@ -22,23 +23,48 @@ class _GameWidgetState extends ConsumerState<GameWidget> {
   @override
   void initState() {
     super.initState();
+
     final driver = _driver;
     driver.onStepEnded = () {
+      if (!mounted || driver.isGameOver) {
+        return;
+      }
+
       WidgetsBinding.instance.addPostFrameCallback((_) => driver.step(_depth));
     };
+
     driver.step(_depth);
   }
 
   @override
   Widget build(BuildContext context) {
     final driver = ref.watch(gameDriverProvider);
+    const separator = SizedBox(height: 32);
+    final theme = Theme.of(context);
 
     return ListenableBuilder(
       listenable: driver,
       builder: (context, child) => Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('current: ${driver.currentPlayer}'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Current turn', style: theme.textTheme.titleLarge),
+              const SizedBox(width: 12),
+              Column(
+                children: [
+                  CheckerPiece.color(driver.currentPlayer),
+                  const SizedBox(height: 6),
+                  Text(
+                    driver.currentHandle.name,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          separator,
           BoardWidget(board: driver.board),
         ],
       ),
