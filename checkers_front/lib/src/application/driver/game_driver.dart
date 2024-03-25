@@ -38,7 +38,7 @@ class GameDriver extends ChangeNotifier {
   }
 
   void _switchTurn() {
-    _currentPlayerColor = _currentPlayerColor.flip();
+    _currentPlayerColor = _currentPlayerColor.flipped();
     _lastMoved = null;
   }
 
@@ -46,7 +46,7 @@ class GameDriver extends ChangeNotifier {
   void _onMoved() {
     final lastMoved = _lastMoved;
 
-    if (lastMoved == null || lastMoved.$1 != _currentPlayerColor.flip().homeRow) {
+    if (lastMoved == null || lastMoved.$1 != _currentPlayerColor.flipped().homeRow) {
       return;
     }
 
