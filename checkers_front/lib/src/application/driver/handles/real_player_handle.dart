@@ -27,6 +27,7 @@ class RealPlayerHandle implements PlayerHandle {
   Future<Movement> takeTurn({
     required Board board,
     required Position? lastMoved,
+    required int depth,
   }) =>
       _movementStreamController.stream.first;
 

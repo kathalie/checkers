@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../application/driver/handles/mock_handle.dart';
 import '../application/driver/handles/prolog_handle.dart';
 import '../application/driver/handles/real_player_handle.dart';
 import '../application/driver/player_handle.dart';
 import '../application/providers/handles_notifier.dart';
+import '../application/providers/session_settings_notifier.dart';
 import '../domain/constraints/checker_color.dart';
 import '../http/prolog_player_service.dart';
+import 'game_page.dart';
 import 'settings_page.dart';
 import 'widgets/checker_widget.dart';
-import 'game_page.dart';
 
 class MainPage extends ConsumerWidget {
   const MainPage({super.key});
@@ -91,7 +91,7 @@ class MainPage extends ConsumerWidget {
   }
 }
 
-class _PlayerSelector extends StatelessWidget {
+class _PlayerSelector extends ConsumerWidget {
   final CheckerColor color;
   final void Function(PlayerHandle handle) onSelected;
   final PlayerHandle selected;
@@ -111,13 +111,19 @@ class _PlayerSelector extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(sessionSettingsNotifierProvider);
+
+    const prologService = PrologPlayerService();
+
     final handles = [
       RealPlayerHandle(color),
-      PrologHandle(color, service: const PrologPlayerService()),
+      PrologHandle(color, service: prologService),
     ];
 
-    return Row(
+    final selected = this.selected;
+
+    final child = Row(
       children: [
         CheckerPiece.color(color),
         Expanded(
@@ -136,6 +142,37 @@ class _PlayerSelector extends StatelessWidget {
                   )
                   .toList(growable: false),
             ),
+          ),
+        ),
+      ],
+    );
+
+    if (selected is! PrologHandle) {
+      return child;
+    }
+
+    const depths = [2, 5, 10];
+    final currentValue = settings.aiDifficulties[color]!;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        child,
+        const SizedBox(height: 8),
+        Text('Depth: $currentValue'),
+        SizedBox(
+          height: 50,
+          child: Slider(
+            divisions: 2,
+            min: 0,
+            max: (depths.length - 1).toDouble(),
+            value: depths.indexOf(currentValue).toDouble(),
+            onChanged: (value) {
+              final index = value.round();
+              ref
+                  .read(sessionSettingsNotifierProvider.notifier)
+                  .setAiDifficulty(color, depths[index]);
+            },
           ),
         ),
       ],

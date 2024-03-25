@@ -5,7 +5,7 @@ import '../../application/board/board.dart';
 import '../../application/checker.dart';
 import '../../application/driver/handles/real_player_handle.dart';
 import '../../application/providers/current_handle_provider.dart';
-import '../../application/providers/highlight_assist_provider.dart';
+import '../../application/providers/session_settings_notifier.dart';
 import '../../application/providers/movable_checkers_provider.dart';
 import '../../application/providers/possible_moves_notifier.dart';
 import '../../domain/constants.dart';
@@ -77,7 +77,7 @@ class BoardCell extends ConsumerWidget {
         .where((mode) => mode.willHighlight(position))
         .firstOrNull;
 
-    final assistHighlight = ref.watch(highlightAssistNotifierProvider)
+    final assistHighlight = ref.watch(sessionSettingsNotifierProvider).movesHighlight
         ? switch (possibleMove) {
             CanMoveOrBeat(:final to) when to == position => highlightColors.accessibleCell,
             MustBeat(:final at) when at == position => highlightColors.toBeBeatenChecker,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../application/providers/highlight_assist_provider.dart';
+import '../application/providers/session_settings_notifier.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -17,13 +17,13 @@ class SettingsPage extends ConsumerWidget {
             CheckboxListTile(
               title: const Text('Enable movement assist highlight'),
               subtitle: const Text('Highlight the available moves on checker drag'),
-              value: ref.watch(highlightAssistNotifierProvider),
+              value: ref.watch(sessionSettingsNotifierProvider).movesHighlight,
               onChanged: (newValue) {
                 if (newValue == null) {
                   return;
                 }
 
-                ref.read(highlightAssistNotifierProvider.notifier).toggle();
+                ref.read(sessionSettingsNotifierProvider.notifier).toggleHighlight();
               },
             ),
           ],

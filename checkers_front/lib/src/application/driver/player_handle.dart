@@ -10,5 +10,6 @@ abstract interface class PlayerHandle {
   Future<Movement> takeTurn({
     required Board board,
     required Position? lastMoved,
+    required int depth,
   });
 }

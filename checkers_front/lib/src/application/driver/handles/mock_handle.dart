@@ -16,6 +16,7 @@ class MockHandle implements PlayerHandle {
   Future<Movement> takeTurn({
     required Board board,
     required Position? lastMoved,
+    required int depth,
   }) async =>
       (from: (0, 0), to: (1, 1));
 

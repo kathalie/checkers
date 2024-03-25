@@ -12,36 +12,33 @@ class PrologHandle implements PlayerHandle {
   @override
   final CheckerColor color;
 
-  final int _depth;
-
   final PrologPlayerService _service;
 
   const PrologHandle(
     this.color, {
     required PrologPlayerService service,
-    int depth = 3,
-  })  : _depth = depth,
-        _service = service;
+  }) : _service = service;
 
   @override
-  Future<Movement> takeTurn({required Board board, required Position? lastMoved}) async {
+  Future<Movement> takeTurn({
+    required Board board,
+    required Position? lastMoved,
+    required int depth,
+  }) async {
     final normalizedBoard = color == CheckerColor.white ? board : BoardMirror(board);
 
     return _service.fetchTurn(
       board: normalizedBoard,
       lastMoved: lastMoved,
-      depth: _depth,
+      depth: depth,
     );
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PrologHandle &&
-          runtimeType == other.runtimeType &&
-          color == other.color &&
-          _depth == other._depth;
+      other is PrologHandle && runtimeType == other.runtimeType && color == other.color;
 
   @override
-  int get hashCode => color.hashCode ^ _depth.hashCode;
+  int get hashCode => color.hashCode;
 }

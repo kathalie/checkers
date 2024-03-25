@@ -31,6 +31,7 @@ class GameDriver extends ChangeNotifier {
   PlayerHandle get currentHandle =>
       _currentPlayerColor == CheckerColor.white ? _handles.white : _handles.black;
 
+  @override
   void dispose() {
     super.dispose();
     final (:white, :black) = _handles;
@@ -53,10 +54,11 @@ class GameDriver extends ChangeNotifier {
     _promoteAt(lastMoved);
   }
 
-  Future<void> step() async {
+  Future<void> step(int depth) async {
     final Movement(:from, :to) = await currentHandle.takeTurn(
       board: board,
       lastMoved: _lastMoved,
+      depth: depth,
     );
 
     _validateCheckerAt(from);
