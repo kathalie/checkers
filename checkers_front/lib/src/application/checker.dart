@@ -14,8 +14,13 @@ final _kingDirections = List.generate(boardSide, (index) => index + 1)
 class Checker {
   final CheckerColor color;
   final bool isKing;
+  final int key;
 
-  const Checker({required this.color, this.isKing = false});
+  const Checker({
+    required this.color,
+    this.isKing = false,
+    required this.key,
+  });
 
   /// Returns all the possible target cells where this checker could go.
   ///

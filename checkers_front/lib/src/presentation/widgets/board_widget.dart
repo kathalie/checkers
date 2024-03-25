@@ -5,6 +5,8 @@ import '../../application/board/board.dart';
 import '../../application/checker.dart';
 import '../../application/driver/handles/real_player_handle.dart';
 import '../../application/providers/current_handle_provider.dart';
+import '../../application/providers/highlight_assist_provider.dart';
+import '../../application/providers/movable_checkers_provider.dart';
 import '../../application/providers/possible_moves_notifier.dart';
 import '../../domain/constants.dart';
 import '../../domain/constraints/move_mode.dart';
@@ -65,35 +67,50 @@ class BoardCell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pieceContained = this.pieceContained;
-    late final background = isBlackCell(position) ? blackCellColor : null;
+    late final cellBackground = isBlackCell(position) ? blackCellColor : null;
+
+    final possibleMoves = ref.watch(movableCheckersProvider);
+    final canPieceMove = possibleMoves[position] != null;
 
     final possibleMove = ref
         .watch(possibleMovesNotifierProvider)
         .where((mode) => mode.willHighlight(position))
         .firstOrNull;
 
-    final highlight = switch (possibleMove) {
-      CanMoveOrBeat(:final to) when to == position => Colors.green,
-      MustBeat(:final at) when at == position => Colors.red,
-      _ => null,
-    };
+    final assistHighlight = ref.watch(highlightAssistNotifierProvider)
+        ? switch (possibleMove) {
+            CanMoveOrBeat(:final to) when to == position => highlightColors.accessibleCell,
+            MustBeat(:final at) when at == position => highlightColors.toBeBeatenChecker,
+            _ => null,
+          }
+        : null;
 
-    return DragTarget<Checker>(
-      onWillAccept: (data) => highlight != null,
-      onAccept: (data) {
+    return DragTarget<(Checker, Position)>(
+      onWillAccept: (data) {
         final currentHandle = ref.read(currentHandleProvider);
-        if (currentHandle is! RealPlayerHandle || possibleMove == null) {
+
+        return currentHandle is RealPlayerHandle;
+      },
+      onAccept: (data) {
+        if (possibleMove == null) {
           return;
         }
 
-        currentHandle.movementSink.add((from: possibleMove.from, to: possibleMove.to));
+        final currentHandle = ref.read(currentHandleProvider);
+
+        if (currentHandle is RealPlayerHandle) {
+          currentHandle.movementSink.add(
+            (from: data.$2, to: possibleMove.to),
+          );
+        }
       },
       builder: (context, candidateData, rejectedData) => AspectRatio(
         aspectRatio: 1 / 1,
         child: Container(
           decoration: BoxDecoration(
             border: border,
-            color: highlight ?? background,
+            color:
+                assistHighlight ?? (canPieceMove ? highlightColors.movableChecker : cellBackground),
           ),
           child: pieceContained != null
               ? Center(

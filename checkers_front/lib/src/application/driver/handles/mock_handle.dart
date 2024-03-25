@@ -5,6 +5,9 @@ import '../player_handle.dart';
 
 class MockHandle implements PlayerHandle {
   @override
+  String get name => 'Mock';
+
+  @override
   final CheckerColor color;
 
   const MockHandle(this.color);
@@ -15,4 +18,12 @@ class MockHandle implements PlayerHandle {
     required Position? lastMoved,
   }) async =>
       (from: (0, 0), to: (1, 1));
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MockHandle && runtimeType == other.runtimeType && color == other.color;
+
+  @override
+  int get hashCode => color.hashCode;
 }

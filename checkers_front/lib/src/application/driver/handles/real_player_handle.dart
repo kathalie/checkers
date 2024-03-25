@@ -7,6 +7,9 @@ import '../player_handle.dart';
 
 class RealPlayerHandle implements PlayerHandle {
   @override
+  String get name => 'Real player';
+
+  @override
   final CheckerColor color;
 
   final StreamController<Movement> _movementStreamController = StreamController.broadcast();
@@ -26,4 +29,12 @@ class RealPlayerHandle implements PlayerHandle {
     required Position? lastMoved,
   }) =>
       _movementStreamController.stream.first;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RealPlayerHandle && runtimeType == other.runtimeType && color == other.color;
+
+  @override
+  int get hashCode => color.hashCode;
 }

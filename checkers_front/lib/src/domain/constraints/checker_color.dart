@@ -24,7 +24,7 @@ enum CheckerColor {
     required this.homeRow,
   });
 
-  CheckerColor flip() => switch (this) {
+  CheckerColor flipped() => switch (this) {
         CheckerColor.white => CheckerColor.black,
         CheckerColor.black => CheckerColor.white,
       };

@@ -15,7 +15,8 @@ class PossibleMovesNotifier extends _$PossibleMovesNotifier {
   void reset() => state = <CanMoveOrBeat>[].lock;
 
   void updateMovesFor(Position pos) {
-    final gameDriver = ref.read(gameDriverNotifierProvider);
+    // ignore: avoid_manual_providers_as_generated_provider_dependency
+    final gameDriver = ref.read(gameDriverProvider);
     final board = gameDriver.board;
     final checker = board[pos];
 
@@ -27,10 +28,10 @@ class PossibleMovesNotifier extends _$PossibleMovesNotifier {
 
     final mustBeat = moves.whereType<MustBeat>();
     if (mustBeat.isNotEmpty) {
-      state = mustBeat.toList(growable: false).lock;
+      state = IList(mustBeat);
       return;
     }
 
-    state = moves.toList(growable: false).lock;
+    state = IList(moves);
   }
 }

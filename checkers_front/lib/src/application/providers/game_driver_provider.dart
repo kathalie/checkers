@@ -1,25 +1,20 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../board/board_generator.dart';
 import '../board/board_impl.dart';
 import '../driver/game_driver.dart';
 import 'handles_notifier.dart';
 
-part 'game_driver_provider.g.dart';
+final gameDriverProvider = ChangeNotifierProvider((ref) {
+  final (:white, :black) = ref.read(handlesNotifierProvider);
 
-@riverpod
-class GameDriverNotifier extends _$GameDriverNotifier {
-  @override
-  GameDriver build() {
-    ref.keepAlive();
-    ref.onDispose(() => state.dispose());
+  final gameDriver = GameDriver(
+    BoardImpl(generateInitialBoard()),
+    whiteHandle: white,
+    blackHandle: black,
+  );
 
-    final (white, black) = ref.watch(handlesNotifierProvider);
+  ref.onDispose(() => gameDriver.dispose());
 
-    return GameDriver(
-      BoardImpl(generateInitialBoard()),
-      whiteHandle: white,
-      blackHandle: black,
-    );
-  }
-}
+  return gameDriver;
+});

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
@@ -6,9 +8,9 @@ import '../checker.dart';
 import 'handles/real_player_handle.dart';
 import 'player_handle.dart';
 
-class GameDriver {
+class GameDriver extends ChangeNotifier {
   final Board board;
-  final ({PlayerHandle white, PlayerHandle black}) _handles;
+  final Handles _handles;
   CheckerColor _currentPlayerColor = CheckerColor.white;
   Position? _lastMoved;
 
@@ -30,12 +32,13 @@ class GameDriver {
       _currentPlayerColor == CheckerColor.white ? _handles.white : _handles.black;
 
   void dispose() {
+    super.dispose();
     final (:white, :black) = _handles;
     [black, white].whereType<RealPlayerHandle>().forEach((handle) => handle.dispose());
   }
 
   void _switchTurn() {
-    _currentPlayerColor = _currentPlayerColor.flip();
+    _currentPlayerColor = _currentPlayerColor.flipped();
     _lastMoved = null;
   }
 
@@ -43,7 +46,7 @@ class GameDriver {
   void _onMoved() {
     final lastMoved = _lastMoved;
 
-    if (lastMoved == null || lastMoved.$1 != _currentPlayerColor.flip().homeRow) {
+    if (lastMoved == null || lastMoved.$1 != _currentPlayerColor.flipped().homeRow) {
       return;
     }
 
@@ -88,6 +91,7 @@ class GameDriver {
     }
 
     onStepEnded?.call();
+    notifyListeners();
   }
 
   void _move({required Position from, required Position to}) {
@@ -103,7 +107,11 @@ class GameDriver {
       return;
     }
 
-    board[pos] = Checker(color: checker.color, isKing: true);
+    board[pos] = Checker(
+      color: checker.color,
+      isKing: true,
+      key: checker.key,
+    );
   }
 
   void _validateCheckerAt(Position pos) {

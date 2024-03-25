@@ -7,7 +7,10 @@ import '../../application/driver/handles/real_player_handle.dart';
 import '../../application/providers/game_driver_provider.dart';
 import '../../application/providers/possible_moves_notifier.dart';
 import '../../domain/constants.dart';
+import '../../domain/constraints/checker_color.dart';
 import '../../domain/typedefs.dart';
+
+const _innerPieceFraction = 0.7;
 
 class CheckerWidget extends ConsumerWidget {
   final Checker checker;
@@ -22,37 +25,29 @@ class CheckerWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const outerPiecePadding = EdgeInsets.all(2);
-    const innerPieceFraction = 0.7;
     const opacityWhenDragging = 0.3;
 
-    final gameDriver = ref.watch(gameDriverNotifierProvider);
+    final gameDriver = ref.watch(gameDriverProvider);
     final currentHandle = gameDriver.currentHandle;
     final board = gameDriver.board;
 
-    final (outerColor, innerColor) = checker.color.displayColors;
-
     final child = Padding(
       padding: outerPiecePadding,
-      child: _CheckerPiece(
-        outerColor: outerColor,
-        innerColor: innerColor,
-        innerPieceFraction: innerPieceFraction,
-        isKing: checker.isKing,
-      ),
+      child: CheckerPiece.checker(checker),
     );
 
     if (currentHandle is RealPlayerHandle &&
         checker.color == currentHandle.color &&
         (board.mustBeatAt(position).isNotEmpty ||
             !board.playerMustBeat(gameDriver.currentPlayer))) {
-      return Draggable<Checker>(
+      return Draggable<(Checker, Position)>(
         onDragStarted: () {
           ref.read(possibleMovesNotifierProvider.notifier).updateMovesFor(position);
         },
         onDragEnd: (details) {
           ref.read(possibleMovesNotifierProvider.notifier).reset();
         },
-        data: checker,
+        data: (checker, position),
         maxSimultaneousDrags: 1,
         feedback: child,
         childWhenDragging: Opacity(
@@ -67,18 +62,32 @@ class CheckerWidget extends ConsumerWidget {
   }
 }
 
-class _CheckerPiece extends StatelessWidget {
+class CheckerPiece extends StatelessWidget {
   final Color outerColor;
   final Color innerColor;
-  final double innerPieceFraction;
   final bool isKing;
 
-  const _CheckerPiece({
+  const CheckerPiece({
     required this.outerColor,
     required this.innerColor,
-    required this.innerPieceFraction,
     this.isKing = false,
+    super.key,
   });
+
+  factory CheckerPiece.checker(Checker checker) => CheckerPiece.color(
+        checker.color,
+        isKing: checker.isKing,
+      );
+
+  factory CheckerPiece.color(CheckerColor color, {bool isKing = false}) {
+    final (outerColor, innerColor) = color.displayColors;
+
+    return CheckerPiece(
+      outerColor: outerColor,
+      innerColor: innerColor,
+      isKing: isKing,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +95,7 @@ class _CheckerPiece extends StatelessWidget {
       backgroundColor: outerColor,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final innerRadius = constraints.maxWidth / 2 * innerPieceFraction;
+          final innerRadius = constraints.maxWidth / 2 * _innerPieceFraction;
 
           return CircleAvatar(
             radius: innerRadius,
