@@ -8,7 +8,7 @@ import 'player_handle.dart';
 
 class GameDriver {
   final Board board;
-  final ({PlayerHandle white, PlayerHandle black}) _handles;
+  final Handles _handles;
   CheckerColor _currentPlayerColor = CheckerColor.white;
   Position? _lastMoved;
 

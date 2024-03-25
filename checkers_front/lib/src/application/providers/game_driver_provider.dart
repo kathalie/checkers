@@ -14,7 +14,7 @@ class GameDriverNotifier extends _$GameDriverNotifier {
     ref.keepAlive();
     ref.onDispose(() => state.dispose());
 
-    final (white, black) = ref.watch(handlesNotifierProvider);
+    final (:white, :black) = ref.watch(handlesNotifierProvider);
 
     return GameDriver(
       BoardImpl(generateInitialBoard()),

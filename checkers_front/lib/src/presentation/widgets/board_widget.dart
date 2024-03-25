@@ -79,14 +79,21 @@ class BoardCell extends ConsumerWidget {
     };
 
     return DragTarget<Checker>(
-      onWillAccept: (data) => highlight != null,
-      onAccept: (data) {
+      onWillAccept: (data) {
         final currentHandle = ref.read(currentHandleProvider);
-        if (currentHandle is! RealPlayerHandle || possibleMove == null) {
+
+        return currentHandle is RealPlayerHandle;
+      },
+      onAccept: (data) {
+        if (possibleMove == null) {
           return;
         }
 
-        currentHandle.movementSink.add((from: possibleMove.from, to: possibleMove.to));
+        final currentHandle = ref.read(currentHandleProvider);
+
+        if (currentHandle is RealPlayerHandle) {
+          currentHandle.movementSink.add((from: possibleMove.from, to: possibleMove.to));
+        }
       },
       builder: (context, candidateData, rejectedData) => AspectRatio(
         aspectRatio: 1 / 1,
