@@ -152,21 +152,24 @@ class _PlayerSelector extends ConsumerWidget {
     }
 
     const depths = [2, 5, 10];
+    const labels = ['Beginner', 'Master', 'Pro'];
     final currentValue = settings.aiDifficulties[color]!;
+
+    final index = depths.indexOf(currentValue);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         child,
         const SizedBox(height: 8),
-        Text('Depth: $currentValue'),
+        Text(labels[index]),
         SizedBox(
           height: 50,
           child: Slider(
             divisions: 2,
             min: 0,
             max: (depths.length - 1).toDouble(),
-            value: depths.indexOf(currentValue).toDouble(),
+            value: index.toDouble(),
             onChanged: (value) {
               final index = value.round();
               ref
