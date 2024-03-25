@@ -12,7 +12,7 @@ List<List<Checker?>> generateInitialBoard() {
       }
 
       return Checker(
-        key: row * column,
+        key: (row + 1) * (column + 1),
         color: row < filledRows ? CheckerColor.black : CheckerColor.white,
       );
     }),
