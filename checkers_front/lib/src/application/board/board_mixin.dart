@@ -50,7 +50,10 @@ mixin BoardMixin on Board {
       late final next = _firstCheckerBetween(otherPos, to);
 
       if (diagonalDistanceBetween(from, to) == 2 ||
-          (checker.isKing && (next == null || diagonalDistanceBetween(otherPos, next.$2) > 1))) {
+          (checker.isKing &&
+              (next == null ||
+                  diagonalDistanceBetween(otherPos, next.$2) >
+                      diagonalDistanceBetween(otherPos, to)))) {
         return MustBeat(from: from, to: to, at: otherPos);
       }
     }
