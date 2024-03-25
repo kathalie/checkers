@@ -1,6 +1,7 @@
-import '../checker.dart';
+import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
+import '../checker.dart';
 
 abstract interface class Board {
   Checker? operator [](Position pos);
@@ -16,6 +17,8 @@ abstract interface class Board {
   Iterable<CanMoveOrBeat> possibleMoves({required Position from});
 
   Iterable<MustBeat> mustBeatAt(Position pos);
+
+  bool playerMustBeat(CheckerColor color);
 
   bool isValidPosition(Position position);
 }

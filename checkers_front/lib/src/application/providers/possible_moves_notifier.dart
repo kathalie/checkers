@@ -31,11 +31,6 @@ class PossibleMovesNotifier extends _$PossibleMovesNotifier {
       return;
     }
 
-    if (gameDriver.currentPlayerPositions.any((pos) => board.mustBeatAt(pos).isNotEmpty)) {
-      state = <CanMoveOrBeat>[].lock;
-      return;
-    }
-
     state = moves.toList(growable: false).lock;
   }
 }

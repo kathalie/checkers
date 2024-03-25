@@ -1,4 +1,5 @@
 import '../../domain/constants.dart';
+import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/position_functions.dart';
 import '../../domain/typedefs.dart';
@@ -63,6 +64,10 @@ mixin BoardMixin on Board {
 
   @override
   Iterable<MustBeat> mustBeatAt(Position pos) => possibleMoves(from: pos).whereType<MustBeat>();
+
+  @override
+  bool playerMustBeat(CheckerColor color) =>
+      (color == CheckerColor.white ? whites : blacks).any((pos) => mustBeatAt(pos).isNotEmpty);
 
   (Checker, Position)? _firstCheckerBetween(Position pos1, Position pos2) {
     final direction = directionOf(vector(from: pos1, to: pos2));

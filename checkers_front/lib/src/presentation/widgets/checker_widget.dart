@@ -25,7 +25,9 @@ class CheckerWidget extends ConsumerWidget {
     const innerPieceFraction = 0.7;
     const opacityWhenDragging = 0.3;
 
-    final currentHandle = ref.watch(gameDriverNotifierProvider).currentHandle;
+    final gameDriver = ref.watch(gameDriverNotifierProvider);
+    final currentHandle = gameDriver.currentHandle;
+    final board = gameDriver.board;
 
     final (outerColor, innerColor) = checker.color.displayColors;
 
@@ -39,7 +41,10 @@ class CheckerWidget extends ConsumerWidget {
       ),
     );
 
-    if (currentHandle is RealPlayerHandle && checker.color == currentHandle.color) {
+    if (currentHandle is RealPlayerHandle &&
+        checker.color == currentHandle.color &&
+        (board.mustBeatAt(position).isNotEmpty ||
+            !board.playerMustBeat(gameDriver.currentPlayer))) {
       return Draggable<Checker>(
         onDragStarted: () {
           ref.read(possibleMovesNotifierProvider.notifier).updateMovesFor(position);
