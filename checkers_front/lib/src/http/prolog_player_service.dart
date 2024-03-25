@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
 import '../application/board/board.dart';
+import '../application/board/board_mirror.dart';
 import '../domain/constants.dart';
 import '../domain/typedefs.dart';
 import 'dto/board_state_dto.dart';
@@ -30,7 +32,12 @@ class PrologPlayerService {
     final res = await http.post(
       _serviceUri.resolve(_bestMoveEndpoint),
       body: BoardStateDto.represent(depth: depth, board: board).toJson(),
+      headers: {
+        HttpHeaders.contentTypeHeader: ContentType.json.mimeType
+      },
     );
+
+    print(res.body);
 
     if (res.statusCode != 200) {
       print(res.bodyBytes);

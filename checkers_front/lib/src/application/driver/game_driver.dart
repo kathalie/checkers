@@ -145,7 +145,7 @@ class GameDriver extends ChangeNotifier {
     if (checker.color != _currentPlayerColor) {
       throw StateError(
         'Player ${_currentPlayerColor.name} tried '
-        'to move a checker of the opponent',
+        'to move a checker of the opponent at $pos',
       );
     }
   }

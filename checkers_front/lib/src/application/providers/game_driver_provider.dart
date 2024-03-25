@@ -7,6 +7,7 @@ import 'handles_notifier.dart';
 
 final gameDriverProvider = ChangeNotifierProvider((ref) {
   final (:white, :black) = ref.read(handlesNotifierProvider);
+  print('white $white black $black');
 
   final gameDriver = GameDriver(
     BoardImpl(generateInitialBoard()),

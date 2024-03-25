@@ -25,13 +25,21 @@ class PrologHandle implements PlayerHandle {
     required Position? lastMoved,
     required int depth,
   }) async {
-    final normalizedBoard = color == CheckerColor.white ? board : BoardMirror(board);
+    final shallFlip = color == CheckerColor.black;
 
-    return _service.fetchTurn(
-      board: normalizedBoard,
+    final movement = await _service.fetchTurn(
+      board: shallFlip ? BoardMirror(board) : board,
       lastMoved: lastMoved,
       depth: depth,
     );
+
+    await Future.delayed(const Duration(milliseconds: 250));
+
+    if (!shallFlip) {
+      return movement;
+    }
+
+    return (from: flip(movement.from), to: flip(movement.to));
   }
 
   @override

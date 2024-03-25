@@ -65,7 +65,7 @@ class CheckerDto {
 
   factory CheckerDto.represent(Checker checker, Position position) {
     final type = '${checker.color == CheckerColor.white ? 'w' : 'b'}'
-        '${checker.isKing ? 'k' : ''}';
+        '${checker.isKing ? 'q' : ''}';
 
     final (row, col) = position;
 
