@@ -1,12 +1,15 @@
+import 'package:collection/collection.dart';
+
 import '../domain/constants.dart';
 import '../domain/constraints/checker_color.dart';
 import '../domain/position_functions.dart';
 import '../domain/typedefs.dart';
 import 'board/board.dart';
 
-const _manDirections = [(-1, -1), (1, 1), (-1, 1), (1, -1)];
+const _directions = [(-1, -1), (1, 1), (-1, 1), (1, -1)];
+final _manDirections = [_directions, _directions.map((vec) => multiply(vec, 2))].flattened;
 final _kingDirections = List.generate(boardSide, (index) => index + 1)
-    .expand((dist) => _manDirections.map((vec) => multiply(vec, dist)));
+    .expand((dist) => _directions.map((vec) => multiply(vec, dist)));
 
 class Checker {
   final CheckerColor color;
@@ -23,6 +26,21 @@ class Checker {
     return (isKing ? _kingDirections : _manDirections)
         .map((dir) => add(vector: dir, toPosition: pos))
         .where(board.isValidPosition);
+  }
+
+  /// Whether this checker can go from [from] to [to].
+  ///
+  /// It only checks the direction and distance, and not obstacles.
+  /// It also does not account for the situations when a checker cab beat backwards.
+  bool canMove({required Position to, required Position from}) {
+    if (isKing) {
+      return true;
+    }
+
+    final (fromRow, toRow) = (from.$1, to.$1);
+
+    return (color == CheckerColor.black ? fromRow < toRow : fromRow > toRow) &&
+        diagonalDistanceBetween(from, to) == 1;
   }
 
   @override

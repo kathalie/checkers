@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/board/board.dart';
 import '../../application/checker.dart';
+import '../../application/driver/handles/real_player_handle.dart';
+import '../../application/providers/current_handle_provider.dart';
+import '../../application/providers/possible_moves_notifier.dart';
 import '../../domain/constants.dart';
+import '../../domain/constraints/move_mode.dart';
 import '../../domain/position_functions.dart';
 import '../../domain/typedefs.dart';
 import '../../util/coordinates_transform.dart';
@@ -30,7 +35,7 @@ class BoardWidget extends StatelessWidget {
   }
 }
 
-class BoardCell extends StatelessWidget {
+class BoardCell extends ConsumerWidget {
   final (int, int) position;
   final Checker? pieceContained;
 
@@ -58,23 +63,47 @@ class BoardCell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final pieceContained = this.pieceContained;
+    late final background = isBlackCell(position) ? blackCellColor : null;
 
-    return AspectRatio(
-      aspectRatio: 1 / 1,
-      child: Container(
-        decoration: BoxDecoration(
-          border: border,
-          color: isBlackCell(position) ? blackCellColor : null,
+    final possibleMove = ref
+        .watch(possibleMovesNotifierProvider)
+        .where((mode) => mode.willHighlight(position))
+        .firstOrNull;
+
+    final highlight = switch (possibleMove) {
+      CanMoveOrBeat(:final to) when to == position => Colors.green,
+      MustBeat(:final at) when at == position => Colors.red,
+      _ => null,
+    };
+
+    return DragTarget<Checker>(
+      onWillAccept: (data) => highlight != null,
+      onAccept: (data) {
+        final currentHandle = ref.read(currentHandleProvider);
+        if (currentHandle is! RealPlayerHandle || possibleMove == null) {
+          return;
+        }
+
+        currentHandle.movementSink.add((from: possibleMove.from, to: possibleMove.to));
+      },
+      builder: (context, candidateData, rejectedData) => AspectRatio(
+        aspectRatio: 1 / 1,
+        child: Container(
+          decoration: BoxDecoration(
+            border: border,
+            color: highlight ?? background,
+          ),
+          child: pieceContained != null
+              ? Center(
+                  child: CheckerWidget(
+                    checker: pieceContained,
+                    position: position,
+                  ),
+                )
+              : null,
         ),
-        child: pieceContained != null
-            ? Center(
-                child: CheckerWidget(
-                  checker: pieceContained,
-                ),
-              )
-            : null,
       ),
     );
   }

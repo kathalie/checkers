@@ -1,36 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../application/checker.dart';
+import '../../application/driver/handles/real_player_handle.dart';
+import '../../application/providers/game_driver_provider.dart';
+import '../../application/providers/possible_moves_notifier.dart';
 import '../../domain/constants.dart';
+import '../../domain/typedefs.dart';
 
-class CheckerWidget extends StatelessWidget {
+class CheckerWidget extends ConsumerWidget {
   final Checker checker;
+  final Position position;
 
   const CheckerWidget({
     required this.checker,
+    required this.position,
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const outerPiecePadding = EdgeInsets.all(2);
     const innerPieceFraction = 0.7;
+    const opacityWhenDragging = 0.3;
+
+    final gameDriver = ref.watch(gameDriverNotifierProvider);
+    final currentHandle = gameDriver.currentHandle;
+    final board = gameDriver.board;
 
     final (outerColor, innerColor) = checker.color.displayColors;
 
-    return AspectRatio(
-      aspectRatio: 1 / 1,
-      child: Padding(
-        padding: outerPiecePadding,
-        child: _CheckerPiece(
-          outerColor: outerColor,
-          innerColor: innerColor,
-          innerPieceFraction: innerPieceFraction,
-          isKing: checker.isKing,
-        ),
+    final child = Padding(
+      padding: outerPiecePadding,
+      child: _CheckerPiece(
+        outerColor: outerColor,
+        innerColor: innerColor,
+        innerPieceFraction: innerPieceFraction,
+        isKing: checker.isKing,
       ),
     );
+
+    if (currentHandle is RealPlayerHandle &&
+        checker.color == currentHandle.color &&
+        (board.mustBeatAt(position).isNotEmpty ||
+            !board.playerMustBeat(gameDriver.currentPlayer))) {
+      return Draggable<Checker>(
+        onDragStarted: () {
+          ref.read(possibleMovesNotifierProvider.notifier).updateMovesFor(position);
+        },
+        onDragEnd: (details) {
+          ref.read(possibleMovesNotifierProvider.notifier).reset();
+        },
+        data: checker,
+        maxSimultaneousDrags: 1,
+        feedback: child,
+        childWhenDragging: Opacity(
+          opacity: opacityWhenDragging,
+          child: child,
+        ),
+        child: child,
+      );
+    }
+
+    return child;
   }
 }
 

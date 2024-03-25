@@ -1,19 +1,21 @@
 import '../../domain/constants.dart';
+import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/position_functions.dart';
 import '../../domain/typedefs.dart';
 import '../checker.dart';
 import 'board.dart';
 
-const _canMove = CanMove();
 const _cannotMove = CannotMove();
 
 mixin BoardMixin on Board {
   @override
   bool isValidPosition(Position position) {
+    bool isValidIndex(int index) => index >= 0 && index < boardSide;
+
     final (row, col) = position;
 
-    return _isValidIndex(row) && _isValidIndex(col);
+    return isValidIndex(row) && isValidIndex(col);
   }
 
   @override
@@ -36,27 +38,36 @@ mixin BoardMixin on Board {
       return _cannotMove;
     }
 
-    final length = diagonalVectorLength(vec);
-
-    if (length == 1) {
-      return _canMove;
-    }
-
     final firstCheckerBetween = _firstCheckerBetween(from, to);
 
     if (firstCheckerBetween == null) {
-      return checker.isKing ? _canMove : _cannotMove;
+      return checker.canMove(from: from, to: to) ? CanMove(from: from, to: to) : _cannotMove;
     }
 
-    final (other, pos) = firstCheckerBetween;
+    final (other, otherPos) = firstCheckerBetween;
 
     if (other.color != checker.color &&
-        (checker.isKing || diagonalDistanceBetween(from, pos) == 2)) {
-      return MustBeat(at: pos);
+        (checker.isKing || diagonalDistanceBetween(from, to) == 2)) {
+      return MustBeat(from: from, to: to, at: otherPos);
     }
 
     return _cannotMove;
   }
+
+  @override
+  Iterable<CanMoveOrBeat> possibleMoves({required Position from}) =>
+      this[from]
+          ?.possibleTargets(fromPosition: from, board: this)
+          .map((target) => moveMode(from: from, to: target))
+          .whereType<CanMoveOrBeat>() ??
+      [];
+
+  @override
+  Iterable<MustBeat> mustBeatAt(Position pos) => possibleMoves(from: pos).whereType<MustBeat>();
+
+  @override
+  bool playerMustBeat(CheckerColor color) =>
+      (color == CheckerColor.white ? whites : blacks).any((pos) => mustBeatAt(pos).isNotEmpty);
 
   (Checker, Position)? _firstCheckerBetween(Position pos1, Position pos2) {
     final direction = directionOf(vector(from: pos1, to: pos2));
@@ -74,6 +85,4 @@ mixin BoardMixin on Board {
 
     return null;
   }
-
-  bool _isValidIndex(int index) => index >= 0 && index < boardSide;
 }

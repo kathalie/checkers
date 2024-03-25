@@ -3,9 +3,10 @@ import '../../domain/typedefs.dart';
 import '../board/board.dart';
 
 abstract interface class PlayerHandle {
+  CheckerColor get color;
+
   Future<Movement> takeTurn({
     required Board board,
-    required CheckerColor color,
     required Position? lastMoved,
   });
 }

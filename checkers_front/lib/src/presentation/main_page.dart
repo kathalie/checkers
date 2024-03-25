@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../application/board/board_generator.dart';
-import '../application/board/board_impl.dart';
-import 'widgets/board_widget.dart';
+import 'game_widget.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends ConsumerWidget {
   const MainPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return const Scaffold(
       body: SafeArea(
-        minimum: const EdgeInsets.all(16),
+        minimum: EdgeInsets.all(16),
         child: Center(
-          child: BoardWidget(
-            board: BoardImpl(generateInitialBoard()),
-          ),
+          child: GameWidget(),
         ),
       ),
     );

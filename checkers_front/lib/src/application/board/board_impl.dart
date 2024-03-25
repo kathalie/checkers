@@ -1,5 +1,7 @@
 import 'package:collection/collection.dart';
 
+import '../../domain/constants.dart';
+import '../../domain/constraints/checker_color.dart';
 import '../../domain/typedefs.dart';
 import '../checker.dart';
 import 'board.dart';
@@ -10,7 +12,38 @@ abstract class _BoardImpl implements Board {}
 class BoardImpl extends _BoardImpl with BoardMixin {
   final List<List<Checker?>> _field;
 
-  BoardImpl(this._field);
+  final Set<Position> _whiteCheckersCache = {};
+
+  final Set<Position> _blackCheckersCache = {};
+
+  BoardImpl(this._field) {
+    _cacheCheckers();
+  }
+
+  @override
+  Iterable<Position> get whites => UnmodifiableSetView(_whiteCheckersCache);
+
+  @override
+  Iterable<Position> get blacks => UnmodifiableSetView(_blackCheckersCache);
+
+  void _cacheCheckers() {
+    for (var row = 0; row < boardSide; row++) {
+      for (var col = 0; col < boardSide; col++) {
+        final checker = _field[row][col];
+        _cacheChecker(checker, (row, col));
+      }
+    }
+  }
+
+  void _cacheChecker(Checker? checker, Position pos) {
+    if (checker != null) {
+      (checker.color == CheckerColor.white ? _whiteCheckersCache : _blackCheckersCache).add(pos);
+      return;
+    }
+
+    _whiteCheckersCache.remove(pos);
+    _blackCheckersCache.remove(pos);
+  }
 
   @override
   Checker? operator [](Position pos) {
@@ -28,6 +61,8 @@ class BoardImpl extends _BoardImpl with BoardMixin {
     final (row, col) = pos;
 
     _field[row][col] = checker;
+
+    _cacheChecker(checker, pos);
   }
 
   void _validatePosition(Position pos) {
