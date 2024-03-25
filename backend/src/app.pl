@@ -6,13 +6,6 @@
 
 :- use_module(main).
 
-% find_carrers(_{skills: Skills, interests: Interests}, _{professions: Professions}) :-
-%     json_array_to_prolog(Skills, ParsedSkills),
-%     json_array_to_prolog(Interests, ParsedInterests),
-%     sort(ParsedSkills, SortedSkills),
-%     sort(ParsedInterests, SortedInterests),
-%     findall(Advice, career_advice(SortedSkills, SortedInterests, Advice), Professions).
-
 parse_cell(_{key: K, type: Ch, row: R, col: C}, cell(K, ChAtom, R, C)) :- 
     atom_string(ChAtom, Ch).
 
@@ -32,12 +25,12 @@ parse_depth_and_board(_{depth: Depth, board: CellsList}, Depth, Board) :-
 handle_best_move_request(Request) :-
     http_read_json_dict(Request, Json),
     parse_depth_and_board(Json, Depth, Board),
-    best_move(Depth, Board, XFrom, YFrom, XTo, YTo),
+    best_move(Depth, Board, RFrom, CFrom, RTo, CTo),
     reply_json_dict(json([
-        xFrom=XFrom,
-        yFrom=YFrom,
-        xTo=XTo,
-        yTo=YTo
+        rFrom=RFrom,
+        cFrom=CFrom,
+        rTo=RTo,
+        cTo=CTo
     ])).
 
 handle_default(_Request) :-

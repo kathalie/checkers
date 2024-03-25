@@ -2,22 +2,25 @@
     best_move/6
 ]).
 
+:- use_module(mechanics).
 :- use_module(alphabeta).
 
-% best_board(+Depth, +Board, -BestBoard)
-best_board(Depth, Board, BestBoard) :-
-    minimax(white, Board, Depth, BestBoard).
+% best_move(+Depth, +Board, -RFrom, -CFrom, -RTo, -CTo).
+best_move(Depth, BoardBefore, RFrom, CFrom, RTo, CTo) :- 
+    minimax(BoardBefore, Depth, white, BoardAfter),
+    detect_move(BoardBefore, BoardAfter, RFrom, CFrom, RTo, CTo), !.
 
-% best_move(+Depth, +Board, -XFrom, -YFrom, -XTo, -YTo).
-best_move(Depth, Board, XFrom, YFrom, XTo, YTo) :- 
-    % write(Board),
-    XFrom = Depth,
-    YFrom = 1,
-    XTo = 0,
-    YTo = 0.
-    %best_board(Depth, Board, BestBoard).
 
-    %TODO: 
-    % - assign EVERY checker with a unique key
-    % - extend predicates with argument for a key of a checker that made a move
-    % - implement `best_move` using a unique key of a moved checker.
+% detect_move(+BoardBefore, +BoardAfter, -RFrom, -CFrom, -RTo, -CTo).
+detect_move(BoardBefore, BoardAfter, RFrom, CFrom, RTo, CTo) :-
+    checker(BoardBefore, K, RFrom, CFrom, _),
+    checker(BoardAfter, K, RTo, CTo, _),
+    RFrom \= RTo,
+    CFrom \= CTo.
+
+
+/**
+boards:board_q_move(Board), 
+write("Board:"), nl, boards:print_board(Board), nl,
+best_move(3, Board, RFrom, CFrom, RTo, CTo).
+*/

@@ -81,7 +81,7 @@ minimizing(black).
 
 % minimax(+Board, +Depth, +Player, -BestBoard).
 minimax(Board, Depth, Player, BestBoard) :- 
-    minimax(Board, Depth, -9999, 9999, Player, Eval, BestBoard), write(Eval), nl.
+    minimax(Board, Depth, -9999, 9999, Player, _, BestBoard).
 
 % minimax(+Board, +Depth, +Alpha, +Beta, +Player, -Eval, -BestBoard).
 % Base cases when the game is over or it is the maximum wanted depth.
