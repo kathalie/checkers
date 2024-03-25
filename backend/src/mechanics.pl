@@ -33,11 +33,11 @@ promote(7, b, bq) :- !.
 promote(_, Ch, Ch) :- !.
 
 
-% Define what type of checker is located in the cell(Ch, R, C).
+% Define what type of checker is located in the cell(K, Ch, R, C).
 % checker(+Board, ?R, ?C, ?Ch)
-checker([cell(Ch, R, C) | _], R, C, Ch).
-checker([_ | RestOfBoard], R, C, Ch) :-
-    checker(RestOfBoard, R, C, Ch).
+checker([cell(K, Ch, R, C) | _], K, R, C, Ch).
+checker([_ | RestOfBoard], K, R, C, Ch) :-
+    checker(RestOfBoard, K, R, C, Ch).
 
 
 % Checks if Ch1 is opponent of Ch2.
@@ -53,13 +53,13 @@ opponent(black, white).
 % Checks if there is a winner.
 % wins(+Board, ?Ch).
 wins(Board, black) :-
-    \+ member(cell(w, _, _), Board),
-    \+ member(cell(wq, _, _), Board).
+    \+ member(cell(_, w, _, _), Board),
+    \+ member(cell(_, wq, _, _), Board).
 
 % wins(+Board, ?Ch).
 wins(Board, white) :-
-    \+ member(cell(b, _, _), Board),
-    \+ member(cell(bq, _, _), Board).
+    \+ member(cell(_, b, _, _), Board),
+    \+ member(cell(_, bq, _, _), Board).
 
 
 game_over(Board) :- wins(Board, _).
@@ -67,11 +67,13 @@ game_over(Board) :- wins(Board, _).
 
 % Move is possible and the board is updated
 % put(+Cell, +RNew, +CNew, +Board, -NewBoard).
-put(cell(Ch, R, C), RNew, CNew, Board, NewBoard) :-
+put(Cell, RNew, CNew, Board, NewBoard) :-
+    Cell = cell(K, Ch, _, _),
     is_valid(RNew), is_valid(CNew),
-    \+ checker(Board, RNew, CNew, _),
-    promote(RNew, Ch, ChNew),
-    replace(cell(Ch, R, C), Board, cell(ChNew, RNew, CNew), NewBoard), !.
+    \+ checker(Board, _, RNew, CNew, _), % cell with coords (RNew, CNew) is not occupied.
+    promote(RNew, Ch, ChNew), % checker on teh new position is promoted to queen if possible.
+    replace(Cell, Board, cell(K, ChNew, RNew, CNew), NewBoard), 
+    !.
 
 
 % Checks if checkers in cells (R1, C1) and (R2, C2) respectively have a corner in common.
@@ -80,25 +82,27 @@ are_neighbours(R1, C1, R2, C2) :-
     RDiff = R1 - R2, 
     abs(RDiff) =:= 1,
     CDiff = C1 - C2,
-    abs(CDiff) =:= 1, !.
+    abs(CDiff) =:= 1, 
+    !.
 
 
 % Checks if checkers in cells (R1, C1) and (R2, C2) respectively are on one diagonal.
 % are_in_diagonal(+R1, +C1, +R2, +C2).
 are_in_diagonal(R1, C1, R2, C2) :-
     vector(R1, R2, C1, C2, X, Y),
-    is_diagonal_vector(X, Y).
+    is_diagonal_vector(X, Y),
+    !.
 
 
 % Checks if Ch can eat ChToEat.
 % eatable(+Ch, +ChToEat, +Board).
-eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)) :-
+eatable(cell(_, ChW, RW, CW), cell(_, ChB, RB, CB)) :-
     opponent(ChW, ChB),
     \+ queen(ChW),
     are_neighbours(RW, CW, RB, CB).
 
 % eatable(+Ch, +ChToEat, +Board).
-eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)) :-
+eatable(cell(_, ChW, RW, CW), cell(_, ChB, RB, CB)) :-
     opponent(ChW, ChB),
     queen(ChW),
     are_in_diagonal(RW, CW, RB, CB).
@@ -106,8 +110,10 @@ eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)) :-
 
 % Checker Ch eats checker ChToEat if possible and new board is generated. 
 % eat(+Ch, +ChToEat, +Board, -NewBoard).
-eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
-    eatable(cell(ChW, RW, CW), cell(ChB, RB, CB)),
+eat(Cell, CellToEat, Board, NewBoard) :-
+    Cell = cell(_, _, RW, CW),
+    CellToEat = cell(_, _, RB, CB),
+    eatable(Cell, CellToEat),
     % Define direction to move the checker.
     vector(RW, RB, CW, CB, RVector, CVector),
     RDirection is sign(RVector), 
@@ -115,9 +121,9 @@ eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
     RNew is RW + RDirection * (abs(RVector) + 1),
     CNew is CW + CDirection * (abs(CVector) + 1),
     % Move the checker to a new position.
-    put(cell(ChW, RW, CW), RNew, CNew, Board, IntermediaryBoard),
+    put(Cell, RNew, CNew, Board, IntermediaryBoard),
     % Eat the checker and remove it from board.
-    select(cell(ChB, RB, CB), IntermediaryBoard, NewBoard), 
+    select(CellToEat, IntermediaryBoard, NewBoard), 
     !. 
 
 
@@ -125,7 +131,8 @@ eat(cell(ChW, RW, CW), cell(ChB, RB, CB), Board, NewBoard) :-
 % w moves from 7 to 0.
 % b moves from 0 to 7.
 % move_forward(+Cell, +Board, -NewBoards).
-move_forward(cell(Ch, R, C), Board, NewBoards) :-
+move_forward(Cell, Board, NewBoards) :-
+    Cell = cell(_, Ch, R, C),
     \+ queen(Ch),
     (
         (player(white, Ch), RNew is R - 1);
@@ -135,32 +142,35 @@ move_forward(cell(Ch, R, C), Board, NewBoards) :-
         CNew is C + 1;
         CNew is C - 1
     ), 
-    put(cell(Ch, R, C), RNew, CNew, Board, NewBoards).
+    put(Cell, RNew, CNew, Board, NewBoards).
 
-move_forward(cell(Ch, R, C), Board, NewBoards) :-
+move_forward(Cell, Board, NewBoards) :-
+    Cell = cell(_, Ch, _, _),
     queen(Ch),
     (
-        move_in_direction(1, 1, 1, cell(Ch, R, C), Board, NewBoards);
-        move_in_direction(-1, 1, 1, cell(Ch, R, C), Board, NewBoards);
-        move_in_direction(1, -1, 1, cell(Ch, R, C), Board, NewBoards);
-        move_in_direction(-1, -1, 1, cell(Ch, R, C), Board, NewBoards)
+        move_in_direction(1, 1, 1, Cell, Board, NewBoards);
+        move_in_direction(-1, 1, 1, Cell, Board, NewBoards);
+        move_in_direction(1, -1, 1, Cell, Board, NewBoards);
+        move_in_direction(-1, -1, 1, Cell, Board, NewBoards)
     ).
 
-move_in_direction(X, Y, Dist, cell(Ch, R, C), Board, NewBoards) :-
+move_in_direction(X, Y, Dist, Cell, Board, NewBoards) :-
+    Cell = cell(_, Ch, R, C),
+    queen(Ch),
     (
         % If there is space for a queen to move further, move.
         (
             RAfterNew is R + X * (Dist + 1),
             CAfterNew is C + Y * (Dist + 1),
-            put(cell(Ch, R, C), RAfterNew, CAfterNew, Board, _),
+            put(Cell, RAfterNew, CAfterNew, Board, _),
             NewDist is Dist + 1,
-            move_in_direction(X, Y, NewDist, cell(Ch, R, C), Board, NewBoards)
+            move_in_direction(X, Y, NewDist, Cell, Board, NewBoards)
         );
         % Otherwise, put it on the new position if possible.
         (
             RNew is R + X * Dist,
             CNew is C + Y * Dist,
-            put(cell(Ch, R, C), RNew, CNew, Board, NewBoards)
+            put(Cell, RNew, CNew, Board, NewBoards)
         )
     ).
 
@@ -170,17 +180,17 @@ move_in_direction(X, Y, Dist, cell(Ch, R, C), Board, NewBoards) :-
 % must_eat(+Player, +Board, -NewBoards).
 must_eat(Player, Board, NewBoards) :-
     player(Player, ChW),
-    checker(Board, RW, CW, ChW),
-    checker(Board, R, C, Ch),
-    eat(cell(ChW, RW, CW), cell(Ch, R, C), Board, NewBoards).
+    checker(Board, KW, RW, CW, ChW),
+    checker(Board, K, R, C, Ch),
+    eat(cell(KW, ChW, RW, CW), cell(K, Ch, R, C), Board, NewBoards).
 
 % Finds all the possible forward moves without eating checkers
 % for Player (white, black).
 % possible_forward_moves(+Player, +Board, -NewBoards).
 possible_forward_moves(Player, Board, NewBoards) :-
     player(Player, Ch),
-    checker(Board, R, C, Ch),
-    move_forward(cell(Ch, R, C), Board, NewBoards).
+    checker(Board, K, R, C, Ch),
+    move_forward(cell(K, Ch, R, C), Board, NewBoards).
 
 % Finds all the possible actions moves for Player (white, black).
 % If Player can eat opponent's checker, it becomes obligatory and all the variants 
@@ -189,10 +199,24 @@ possible_forward_moves(Player, Board, NewBoards) :-
 % possible_forward_moves(+Player, +Board, -NewBoards).
 possible_actions(Player, Board, NewBoards) :-
     \+ game_over(Board),
-    (
-        must_eat(Player, Board, NewBoards);
-        (
-            \+ must_eat(Player, Board, _),
-            possible_forward_moves(Player, Board, NewBoards)
-        )
-    ).
+    must_eat(Player, Board, NewBoards).
+
+possible_actions(Player, Board, NewBoards) :-
+    \+ game_over(Board),
+    \+ must_eat(Player, Board, _),
+    possible_forward_moves(Player, Board, NewBoards).
+
+
+/** <examples>
+?- boards:board_eating(Board), 
+write("Board:"), nl, boards:print_board(Board), nl,
+possible_actions(black, Board, NewBoard), 
+write("New Board: "), nl, boards:print_board(NewBoard), nl.
+
+
+?- boards:board_q_move(Board), 
+write("Board:"), nl, boards:print_board(Board), nl,
+possible_actions(white, Board, NewBoard), 
+write("New Board: "), nl, boards:print_board(NewBoard), nl.
+
+*/

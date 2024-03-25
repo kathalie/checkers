@@ -6,7 +6,7 @@
 
 % best_board(+Depth, +Board, -BestBoard)
 best_board(Depth, Board, BestBoard) :-
-    alphabeta(white, Board, Depth, BestBoard).
+    minimax(white, Board, Depth, BestBoard).
 
 % best_move(+Depth, +Board, -XFrom, -YFrom, -XTo, -YTo).
 best_move(Depth, Board, XFrom, YFrom, XTo, YTo) :- 
