@@ -18,7 +18,9 @@ class _GameWidgetState extends ConsumerState<GameWidget> {
   GameDriver get _driver => ref.read(gameDriverProvider);
 
   int get _depth =>
-      ref.read(sessionSettingsNotifierProvider).aiDifficulties[_driver.currentPlayer]!;
+      ref
+          .read(sessionSettingsNotifierProvider)
+          .aiDifficulties[_driver.currentPlayer]!;
 
   @override
   void initState() {
@@ -26,7 +28,7 @@ class _GameWidgetState extends ConsumerState<GameWidget> {
 
     final driver = _driver;
     driver.onStepEnded = () {
-      if (!mounted || driver.isGameOver) {
+      if (!mounted) {
         return;
       }
 
@@ -44,30 +46,64 @@ class _GameWidgetState extends ConsumerState<GameWidget> {
 
     return ListenableBuilder(
       listenable: driver,
-      builder: (context, child) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Current turn', style: theme.textTheme.titleLarge),
-              const SizedBox(width: 12),
-              Column(
-                children: [
-                  CheckerPiece.color(driver.currentPlayer),
-                  const SizedBox(height: 6),
-                  Text(
-                    driver.currentHandle.name,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                ],
+      builder: (context, child) {
+        final child = Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Current turn', style: theme.textTheme.titleLarge),
+                const SizedBox(width: 12),
+                Column(
+                  children: [
+                    CheckerPiece.color(driver.currentPlayer),
+                    const SizedBox(height: 6),
+                    Text(
+                      driver.currentHandle.name,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            separator,
+            BoardWidget(board: driver.board),
+          ],
+        );
+
+        if (!driver.isGameOver) {
+          return child;
+        }
+
+        return Stack(
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: Opacity(
+                opacity: 0.6,
+                child: child,),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                width: 200,
+                height: 180,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Winner: ${driver.currentPlayer.flipped().name}',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.green[700]),
+                ),
               ),
-            ],
-          ),
-          separator,
-          BoardWidget(board: driver.board),
-        ],
-      ),
+            )
+          ],
+        );
+      },
     );
   }
 }

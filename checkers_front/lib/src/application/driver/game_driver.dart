@@ -57,6 +57,10 @@ class GameDriver extends ChangeNotifier {
   }
 
   Future<void> step(int depth) async {
+    if (isGameOver) {
+      return;
+    }
+
     late final Position from;
     late final Position to;
 
