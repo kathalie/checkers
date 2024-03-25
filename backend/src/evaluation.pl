@@ -1,4 +1,18 @@
-:- module(evaluation, [evaluate_board/2]).
+:- module(evaluation, [
+    evaluate_board/2,
+    wins/2
+    ]).
+
+% Checks if there is a winner.
+% wins(+Board, ?Ch).
+wins(Board, b) :-
+    \+ member(cell(w, _, _), Board),
+    \+ member(cell(wq, _, _), Board).
+
+% wins(+Board, ?Ch).
+wins(Board, w) :-
+    \+ member(cell(b, _, _), Board),
+    \+ member(cell(bq, _, _), Board).
 
 material_value(b, 1).
 material_value(w, -1).
