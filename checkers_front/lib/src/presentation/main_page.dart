@@ -7,12 +7,21 @@ import '../application/driver/player_handle.dart';
 import '../application/providers/handles_notifier.dart';
 import '../domain/constraints/checker_color.dart';
 import 'widgets/checker_widget.dart';
+import 'game_page.dart';
 
 class MainPage extends ConsumerWidget {
   const MainPage({super.key});
 
   void _onHandleSelected(HandlesNotifier notifier, PlayerHandle handle) =>
       notifier.updateWith(handle);
+
+  void _startGame(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const GamePage(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,7 +64,7 @@ class MainPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: padding * 2),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => _startGame(context),
                   child: const Text('START'),
                 ),
               ],

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
@@ -6,7 +8,7 @@ import '../checker.dart';
 import 'handles/real_player_handle.dart';
 import 'player_handle.dart';
 
-class GameDriver {
+class GameDriver extends ChangeNotifier {
   final Board board;
   final Handles _handles;
   CheckerColor _currentPlayerColor = CheckerColor.white;
@@ -30,6 +32,7 @@ class GameDriver {
       _currentPlayerColor == CheckerColor.white ? _handles.white : _handles.black;
 
   void dispose() {
+    super.dispose();
     final (:white, :black) = _handles;
     [black, white].whereType<RealPlayerHandle>().forEach((handle) => handle.dispose());
   }
@@ -88,6 +91,7 @@ class GameDriver {
     }
 
     onStepEnded?.call();
+    notifyListeners();
   }
 
   void _move({required Position from, required Position to}) {

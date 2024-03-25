@@ -27,7 +27,7 @@ class CheckerWidget extends ConsumerWidget {
     const outerPiecePadding = EdgeInsets.all(2);
     const opacityWhenDragging = 0.3;
 
-    final gameDriver = ref.watch(gameDriverNotifierProvider);
+    final gameDriver = ref.watch(gameDriverProvider);
     final currentHandle = gameDriver.currentHandle;
     final board = gameDriver.board;
 
@@ -40,14 +40,14 @@ class CheckerWidget extends ConsumerWidget {
         checker.color == currentHandle.color &&
         (board.mustBeatAt(position).isNotEmpty ||
             !board.playerMustBeat(gameDriver.currentPlayer))) {
-      return Draggable<Checker>(
+      return Draggable<(Checker, Position)>(
         onDragStarted: () {
           ref.read(possibleMovesNotifierProvider.notifier).updateMovesFor(position);
         },
         onDragEnd: (details) {
           ref.read(possibleMovesNotifierProvider.notifier).reset();
         },
-        data: checker,
+        data: (checker, position),
         maxSimultaneousDrags: 1,
         feedback: child,
         childWhenDragging: Opacity(
