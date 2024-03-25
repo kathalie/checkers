@@ -46,9 +46,13 @@ mixin BoardMixin on Board {
 
     final (other, otherPos) = firstCheckerBetween;
 
-    if (other.color != checker.color &&
-        (checker.isKing || diagonalDistanceBetween(from, to) == 2)) {
-      return MustBeat(from: from, to: to, at: otherPos);
+    if (other.color != checker.color) {
+      late final next = _firstCheckerBetween(otherPos, to);
+
+      if (diagonalDistanceBetween(from, to) == 2 ||
+          (checker.isKing && (next == null || diagonalDistanceBetween(otherPos, next.$2) > 1))) {
+        return MustBeat(from: from, to: to, at: otherPos);
+      }
     }
 
     return _cannotMove;
