@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/driver/handles/mock_handle.dart';
+import '../application/driver/handles/prolog_handle.dart';
 import '../application/driver/handles/real_player_handle.dart';
 import '../application/driver/player_handle.dart';
 import '../application/providers/handles_notifier.dart';
 import '../domain/constraints/checker_color.dart';
+import '../http/prolog_player_service.dart';
 import 'settings_page.dart';
 import 'widgets/checker_widget.dart';
 import 'game_page.dart';
@@ -112,7 +114,7 @@ class _PlayerSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final handles = [
       RealPlayerHandle(color),
-      MockHandle(color),
+      PrologHandle(color, service: const PrologPlayerService()),
     ];
 
     return Row(
