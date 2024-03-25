@@ -5,10 +5,10 @@
 :- use_module(mechanics).
 :- use_module(evaluation).
 
-/**
+/** <examples>
 % board_eating, white, 1
 
-boards:board_eating(Board), 
+?- boards:board_eating(Board), 
 write("Board:"), nl, boards:print_board(Board), nl,
 minimax(Board, 1, white, NewBoard), 
 write("New Board: "), nl, boards:print_board(NewBoard), nl, 
@@ -17,7 +17,7 @@ write("New Board: "), nl, boards:print_board(NewBoard), nl,
 
 % board_eating, black, 1
 
-boards:board_eating(Board), 
+?- boards:board_eating(Board), 
 write("Board:"), nl, boards:print_board(Board), nl,
 minimax(Board, 1, black, NewBoard), 
 write("New Board: "), nl, boards:print_board(NewBoard), nl, 
@@ -26,17 +26,16 @@ write("New Board: "), nl, boards:print_board(NewBoard), nl,
 
 % board_eating, black, 3
 
-boards:board_eating(Board), 
+?- boards:board_eating(Board), 
 write("Board:"), nl, boards:print_board(Board), nl,
 minimax(Board, 1, black, NewBoard), 
 write("New Board: "), nl, boards:print_board(NewBoard), nl, 
 !.
 
 
-
 % board_cannot_eat, black, 3
 
-boards:board_cannot_eat(Board), 
+?- boards:board_cannot_eat(Board), 
 write("Board:"), nl, boards:print_board(Board), nl,
 minimax(Board, 1, black, NewBoard), 
 write("New Board: "), nl, boards:print_board(NewBoard), nl, 
@@ -44,7 +43,7 @@ write("New Board: "), nl, boards:print_board(NewBoard), nl,
 
 % board_cannot_eat, white, 3
 
-boards:board_cannot_eat(Board), 
+?- boards:board_cannot_eat(Board), 
 write("Board:"), nl, boards:print_board(Board), nl,
 minimax(Board, 1, white, NewBoard), 
 write("New Board: "), nl, boards:print_board(NewBoard), nl, 
