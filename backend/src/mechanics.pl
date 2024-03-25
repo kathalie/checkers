@@ -1,10 +1,15 @@
 :- module(mechanics, [
     possible_actions/3,
-    game_over/1
+    game_over/1,
+    wins/2,
+    player/2,
+    opponent/2
 ]).
 
 :- use_module(boards).
 :- use_module(utils).
+:- use_module(evaluation).
+
 
 % Checks is column or row exists on a board.
 % is_valid(+CR).
@@ -40,6 +45,21 @@ checker([_ | RestOfBoard], R, C, Ch) :-
 opponent(Ch1, Ch2) :-
     (player(black, Ch1), player(white, Ch2));
     (player(white, Ch1), player(black, Ch2)).
+
+% opponent(?Player1, ?Player2)
+opponent(white, black).
+opponent(black, white).
+
+% Checks if there is a winner.
+% wins(+Board, ?Ch).
+wins(Board, black) :-
+    \+ member(cell(w, _, _), Board),
+    \+ member(cell(wq, _, _), Board).
+
+% wins(+Board, ?Ch).
+wins(Board, white) :-
+    \+ member(cell(b, _, _), Board),
+    \+ member(cell(bq, _, _), Board).
 
 
 game_over(Board) :- wins(Board, _).
@@ -168,8 +188,11 @@ possible_forward_moves(Player, Board, NewBoards) :-
 % Otherwise, possible moves for simple checkers are generated.
 % possible_forward_moves(+Player, +Board, -NewBoards).
 possible_actions(Player, Board, NewBoards) :-
-    must_eat(Player, Board, NewBoards);
+    \+ game_over(Board),
     (
-        \+ must_eat(Player, Board, _),
-        possible_forward_moves(Player, Board, NewBoards)
+        must_eat(Player, Board, NewBoards);
+        (
+            \+ must_eat(Player, Board, _),
+            possible_forward_moves(Player, Board, NewBoards)
+        )
     ).
