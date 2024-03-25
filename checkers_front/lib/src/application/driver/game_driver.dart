@@ -107,7 +107,11 @@ class GameDriver extends ChangeNotifier {
       return;
     }
 
-    board[pos] = Checker(color: checker.color, isKing: true);
+    board[pos] = Checker(
+      color: checker.color,
+      isKing: true,
+      key: checker.key,
+    );
   }
 
   void _validateCheckerAt(Position pos) {
