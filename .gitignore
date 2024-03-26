@@ -1,2 +1,3 @@
 .idea/
 backend/httpd.log
+.DS_Store
