@@ -95,18 +95,40 @@ are_in_diagonal(R1, C1, R2, C2) :-
     !.
 
 
+% gives_checker_in_between(+Cell1, +Cell2, +Board)
+gives_checker_in_between(Cell1, Cell2, Board) :-
+    Cell1 = cell(_, _, R1, C1),
+    Cell2 = cell(_, _, R2, C2),
+    R1 \= R2, C1 \= C2,
+    vector(R1, C1, R2, C2, RVector, CVector),
+    NextR is R1 + sign(RVector),
+    NextC is C1 + sign(CVector),
+    is_valid(NextR), is_valid(NextC),
+    (
+        % check if there is a checker next to the Cell1 and before Cell2
+        (
+            checker(Board, _, NextR, NextC, _),
+            NextR \= R2, NextC \= C2, !
+        );
+        gives_checker_in_between(cell(_, _, NextR, NextC), Cell2, Board)
+    ).
+
+
 % Checks if Ch can eat ChToEat.
 % eatable(+Ch, +ChToEat, +Board).
-eatable(cell(_, ChW, RW, CW), cell(_, ChB, RB, CB)) :-
+eatable(cell(_, ChW, RW, CW), cell(_, ChB, RB, CB), _) :-
     opponent(ChW, ChB),
     \+ queen(ChW),
     are_neighbours(RW, CW, RB, CB).
 
 % eatable(+Ch, +ChToEat, +Board).
-eatable(cell(_, ChW, RW, CW), cell(_, ChB, RB, CB)) :-
+eatable(Cell, CellToEat, Board) :-
+    Cell = cell(_, ChW, RW, CW),
+    CellToEat = cell(_, ChB, RB, CB),
     opponent(ChW, ChB),
     queen(ChW),
-    are_in_diagonal(RW, CW, RB, CB).
+    are_in_diagonal(RW, CW, RB, CB),
+    \+ gives_checker_in_between(Cell, CellToEat, Board).
 
 
 % Checker Ch eats checker ChToEat if possible and new board is generated. 
@@ -114,7 +136,7 @@ eatable(cell(_, ChW, RW, CW), cell(_, ChB, RB, CB)) :-
 eat(Cell, CellToEat, Board, NewBoard) :-
     Cell = cell(_, _, RW, CW),
     CellToEat = cell(_, _, RB, CB),
-    eatable(Cell, CellToEat),
+    eatable(Cell, CellToEat, Board),
     % Define direction to move the checker.
     vector(RW, RB, CW, CB, RVector, CVector),
     RDirection is sign(RVector), 
@@ -220,4 +242,7 @@ write("Board:"), nl, boards:print_board(Board), nl,
 possible_actions(white, Board, NewBoard), 
 write("New Board: "), nl, boards:print_board(NewBoard), nl.
 
+?- boards:board_eating(Board), 
+write("Board:"), nl, boards:print_board(Board), nl,
+gives_checker_in_between(cell(_, _, 7, 1), cell(_, _, 4, 4), Board).
 */
