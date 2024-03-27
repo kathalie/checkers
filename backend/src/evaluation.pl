@@ -35,7 +35,7 @@ evaluate_board(Player, Board, Score) :-
 % evaluate_board(+Player, +Board, +PrevScore, -Score).
 evaluate_board(_, [], Score, Score) :- !.
 
-evaluate_board(Player, [cell(_, Ch, Row, Col) | RestOfBoard], CurrentScore, Score) :-
+evaluate_board(Player, [cell(_, Ch, _, _) | RestOfBoard], CurrentScore, Score) :-
     material_value(Player, Ch, AddToScore),
     NewScore is CurrentScore + AddToScore,
     evaluate_board(Player, RestOfBoard, NewScore, Score).

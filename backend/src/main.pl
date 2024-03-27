@@ -7,7 +7,7 @@
 
 % best_move(+Depth, +Board, -RFrom, -CFrom, -RTo, -CTo).
 best_move(Depth, BoardBefore, RFrom, CFrom, RTo, CTo) :- 
-    minimax(BoardBefore, Depth, white, BoardAfter),
+    best_board(BoardBefore, Depth, white, BoardAfter),
     detect_move(BoardBefore, BoardAfter, RFrom, CFrom, RTo, CTo), !.
 
 

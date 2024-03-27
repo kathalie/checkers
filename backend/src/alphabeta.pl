@@ -1,5 +1,5 @@
 :- module(minimax, [
-    minimax/4
+    best_board/4
 ]).
 
 :- use_module(mechanics).
@@ -80,33 +80,53 @@ maximizing(white).
 minimizing(black).
 
 % minimax(+Board, +Depth, +Player, -BestBoard).
-minimax(Board, Depth, Player, BestBoard) :- 
-    minimax(Board, Depth, -9999, 9999, Player, _, BestBoard).
+best_board(Board, Depth, Player, BestBoard) :- 
+    findall(
+        NextBoard, 
+        possible_actions(Player, Board, NextBoard),
+        NextBoards
+    ),
+    best_board(NextBoards, Depth, -9999, 9999, Player, _, BestBoard).
+
+best_board([], _, _, _, _, BestBoard, BestBoard).
+best_board([NextBoard | Rest], Depth, Alpha, Beta, Player, CurrentBestBoard, BestBoard) :-
+    opponent(Player, NextPlayer),
+    minimax(NextBoard, Depth, Alpha, Beta, NextPlayer, Eval),
+    (    
+        (
+            Eval > Alpha,
+            best_board(Rest, Depth, Eval, Beta, Player, NextBoard, BestBoard)
+        );
+        (
+            Eval =< Alpha,
+            best_board(Rest, Depth, Alpha, Beta, Player, CurrentBestBoard, BestBoard)
+        )
+    ).
 
 % minimax(+Board, +Depth, +Alpha, +Beta, +Player, -Eval, -BestBoard).
 % Base cases when the game is over or it is the maximum wanted depth.
-minimax(Board, Depth, _, _, Player, Eval, Board) :-  
+minimax(Board, Depth, _, _, Player, Eval) :-  
     (
         game_over(Board);
         Depth =:= 0
     ),
-    evaluate_board(Player, Board, Eval).
-    % boards:print_board(Board), nl, write("Eval: "), write(Eval), nl.
+    evaluate_board(Player, Board, TempEval),
+    Eval is TempEval.
 
 % Case when to get the worst board for the opponent.
-minimax(Board, Depth, Alpha, Beta, Player, Eval, BestBoard) :- 
+minimax(Board, Depth, Alpha, Beta, Player, Eval) :- 
     minimax_helper(Board, NewBoard, Depth, NewDepth, Player),
     minimizing(Player),
-    minEval(NewBoard, NewDepth, Alpha, Beta, Player, 9999, Eval, BestBoard).
+    minEval(NewBoard, NewDepth, Alpha, Beta, Player, 9999, Eval).
 
 % Case when to get the best board for the current player.
-minimax(Board, Depth, Alpha, Beta, Player, Eval, BestBoard) :- 
+minimax(Board, Depth, Alpha, Beta, Player, Eval) :- 
     minimax_helper(Board, NewBoard, Depth, NewDepth, Player),
     maximizing(Player),
-    maxEval(NewBoard, NewDepth, Alpha, Beta, Player, -9999, Eval, BestBoard).
+    maxEval(NewBoard, NewDepth, Alpha, Beta, Player, -9999, Eval).
 
 
-% minimax_helper(+Board, -NewBoard, +Depth, -NewDepth, +Player).
+% minimax_helper(+Board, -NewBoard, +Depth, -NewDepth, +Player, -NextPlayer).
 minimax_helper(Board, NewBoard, Depth, NewDepth, Player) :-
     Depth > 0,
     possible_actions(Player, Board, NewBoard),
@@ -114,9 +134,9 @@ minimax_helper(Board, NewBoard, Depth, NewDepth, Player) :-
 
 
 % maxEval(+Board, +Depth, +Alpha, +Beta, +Player, +TempMaxEval, -MaxEval, -Board).
-maxEval(Board, Depth, Alpha, Beta, Player, TempMaxEval, MaxEval, Board) :-
+maxEval(Board, Depth, Alpha, Beta, Player, TempMaxEval, MaxEval) :-
     opponent(Player, NextPlayer),
-    minimax(Board, Depth, Alpha, Beta, NextPlayer, Eval, _),
+    minimax(Board, Depth, Alpha, Beta, NextPlayer, Eval),
     MaxEval is max(TempMaxEval, Eval),
     NewAlpha is max(Alpha, Eval),
     (
@@ -125,9 +145,9 @@ maxEval(Board, Depth, Alpha, Beta, Player, TempMaxEval, MaxEval, Board) :-
     ).
 
 % minEval(+Board, +Depth, +Alpha, +Beta, +Player, +TempMaxEval, -MinEval, -Board).
-minEval(Board, Depth, Alpha, Beta, Player, TempMinEval, MinEval, Board) :-
+minEval(Board, Depth, Alpha, Beta, Player, TempMinEval, MinEval) :-
     opponent(Player, NextPlayer),
-    minimax(Board, Depth, Alpha, Beta, NextPlayer, Eval, _),
+    minimax(Board, Depth, Alpha, Beta, NextPlayer, Eval),
     MinEval is min(TempMinEval, Eval),
     NewBeta is min(Beta, Eval),
     (
