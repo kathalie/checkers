@@ -10,39 +10,42 @@ abstract class _BoardMirror implements Board {}
 
 /// A mirrored [Board] that has its vertical axis and checker colors flipped.
 class BoardMirror extends _BoardMirror with BoardMixin {
-  final Board _wrapped;
+  final Board wrapped;
 
-  BoardMirror(this._wrapped);
-
-  @override
-  Checker? operator [](Position pos) => _wrapped[flip(pos)]?.flipped();
+  BoardMirror(this.wrapped);
 
   @override
-  void operator []=(Position pos, Checker? checker) => _wrapped[flip(pos)] = checker?.flipped();
+  Checker? operator [](Position pos) => wrapped[flip(pos)]?.flipped();
 
   @override
-  Iterable<Position> get blacks => _wrapped.blacks.map(flip);
+  void operator []=(Position pos, Checker? checker) => wrapped[flip(pos)] = checker?.flipped();
 
   @override
-  Iterable<Position> get whites => _wrapped.whites.map(flip);
+  Iterable<Position> get blacks => wrapped.blacks.map(flip);
 
   @override
-  bool isValidPosition(Position position) => _wrapped.isValidPosition(flip(position));
+  Iterable<Position> get whites => wrapped.whites.map(flip);
+
+  @override
+  bool isValidPosition(Position position) => wrapped.isValidPosition(flip(position));
 
   @override
   MoveMode moveMode({required Position from, required Position to}) =>
-      _wrapped.moveMode(from: flip(from), to: flip(to)).flipped();
+      wrapped.moveMode(from: flip(from), to: flip(to)).flipped();
 
   @override
   Iterable<MustBeat> mustBeatAt(Position pos) =>
-      _wrapped.mustBeatAt(flip(pos)).map((e) => e.flipped() as MustBeat);
+      wrapped.mustBeatAt(flip(pos)).map((e) => e.flipped() as MustBeat);
 
   @override
-  bool playerMustBeat(CheckerColor color) => _wrapped.playerMustBeat(color.flipped());
+  bool playerMustBeat(CheckerColor color) => wrapped.playerMustBeat(color.flipped());
 
   @override
   Iterable<CanMoveOrBeat> possibleMoves({required Position from}) =>
-      _wrapped.possibleMoves(from: flip(from)).map((e) => e.flipped() as CanMoveOrBeat);
+      wrapped.possibleMoves(from: flip(from)).map((e) => e.flipped() as CanMoveOrBeat);
+
+  @override
+  Board copy() => BoardMirror(wrapped.copy());
 }
 
 Position flip(Position pos) {

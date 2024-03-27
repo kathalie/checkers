@@ -21,4 +21,6 @@ abstract interface class Board {
   bool playerMustBeat(CheckerColor color);
 
   bool isValidPosition(Position position);
+
+  Board copy();
 }
