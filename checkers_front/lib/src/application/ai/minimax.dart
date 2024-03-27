@@ -43,13 +43,12 @@ Board nextBoard(Board board, int depth, Position? lastMoved) {
 
 int minimax(Board board, int depth, int alpha, int beta, CheckerColor maximizingPlayer) {
   if (depth == 0) {
-    // print(board.evaluate(maximizingPlayer));
     return board.evaluate(maximizingPlayer);
   }
 
   final boardWinner = board.winner;
   if (boardWinner != null) {
-    return (boardWinner == CheckerColor.white ? 100000 : -100000 /*, board*/);
+    return (boardWinner == CheckerColor.white ? 100000 : -100000);
   }
 
   final children = _children(board, maximizingPlayer, null);
@@ -59,7 +58,7 @@ int minimax(Board board, int depth, int alpha, int beta, CheckerColor maximizing
 
     for (final child in children) {
       final eval = minimax(child, depth - 1, alpha, beta, CheckerColor.black);
-      maxEval = max(alpha, eval);
+      maxEval = max(maxEval, eval);
       alpha = max(alpha, eval);
       if (beta <= alpha) {
         break;
