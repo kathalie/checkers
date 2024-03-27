@@ -22,16 +22,14 @@ class DartHandle implements PlayerHandle {
     required Position? lastMoved,
     required int depth,
   }) async {
-    final shallFlip = color == CheckerColor.black;
+    // todo dart ai for black checkers
 
-    // await Future.delayed(const Duration(milliseconds: 250));
+    final shallFlip = color == CheckerColor.black;
 
     final next = await compute(
       (message) => nextBoard(message.$1, message.$2, message.$3),
       (shallFlip ? BoardMirror(board) : board, 5, lastMoved),
     );
-
-    // final res = next is BoardMirror ? next.wrapped : next;
 
     final movement = difference(
       shallFlip ? BoardMirror(board) : board,
@@ -39,7 +37,6 @@ class DartHandle implements PlayerHandle {
       color,
     );
 
-    // return movement;
     if (!shallFlip) {
       return movement;
     }
