@@ -6,8 +6,8 @@
 
 static_material_value(w, 1).
 static_material_value(b, 1).
-static_material_value(wq, 2).
-static_material_value(bq, 2).
+static_material_value(wq, 5).
+static_material_value(bq, 5).
 
 % Evaluates Ch for a Player.
 % Example: for a "white" Player "b" will result in -1, "wq" in 2.
