@@ -17,7 +17,6 @@ class PrologPlayerService {
     required Position? lastMoved,
     required int depth,
   }) async {
-
     final res = await http.post(
       serviceUri.resolve(bestMoveEndpoint),
       body: BoardStateDto.represent(depth: depth, board: board).toJson(),

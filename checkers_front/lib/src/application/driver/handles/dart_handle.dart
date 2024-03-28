@@ -12,12 +12,15 @@ class DartHandle implements PlayerHandle {
   String get name => 'Dart AI';
 
   @override
+  bool get needsAnimation => true;
+
+  @override
   final CheckerColor color;
 
   const DartHandle(this.color);
 
   @override
-  Future<Movement> takeTurn({
+  Future<Movement?> takeTurn({
     required Board board,
     required Position? lastMoved,
     required int depth,
@@ -31,13 +34,17 @@ class DartHandle implements PlayerHandle {
       (shallFlip ? BoardMirror(board) : board, 5, lastMoved),
     );
 
-    final movement = difference(
+    if (next == null) {
+      return null;
+    }
+
+    final movement = maybeDifference(
       shallFlip ? BoardMirror(board) : board,
       next,
       color,
     );
 
-    if (!shallFlip) {
+    if (movement == null || !shallFlip) {
       return movement;
     }
 

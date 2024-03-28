@@ -9,23 +9,22 @@ import '../board/board_evaluation.dart';
 
 const _maxVal = 100000;
 
-Movement difference(Board a, Board b, CheckerColor lastMoved) {
+Movement difference(Board a, Board b, CheckerColor lastMoved) => maybeDifference(a, b, lastMoved)!;
+
+Movement? maybeDifference(Board a, Board b, CheckerColor lastMoved) {
   Set<Position> positions(Board board) =>
       lastMoved == CheckerColor.white ? board.whites.toSet() : board.blacks.toSet();
 
-  print(positions(a));
-  print(positions(b));
+  final from = positions(a).difference(positions(b)).singleOrNull;
+  final to = positions(b).difference(positions(a)).singleOrNull;
 
-  final from = positions(a).difference(positions(b)).single;
-  final to = positions(b).difference(positions(a)).single;
-
-  return (from: from, to: to);
+  return from != null && to != null ? (from: from, to: to) : null;
 }
 
-Board nextBoard(Board board, int depth, Position? lastMoved) {
+Board? nextBoard(Board board, int depth, Position? lastMoved) {
   final children = _children(board, CheckerColor.white, lastMoved);
 
-  Board? bestBoard;
+  Board? bestBoard = children.firstOrNull;
 
   var eval = -_maxVal;
 
@@ -38,7 +37,7 @@ Board nextBoard(Board board, int depth, Position? lastMoved) {
     }
   }
 
-  return bestBoard!;
+  return bestBoard;
 }
 
 int minimax(Board board, int depth, int alpha, int beta, CheckerColor maximizingPlayer) {

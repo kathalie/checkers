@@ -46,6 +46,12 @@ class BoardMirror extends _BoardMirror with BoardMixin {
 
   @override
   Board copy() => BoardMirror(wrapped.copy());
+
+  @override
+  Movement? get lastMove => wrapped.lastMove;
+
+  @override
+  set lastMove(Movement? movement) => wrapped.lastMove = movement;
 }
 
 Position flip(Position pos) {

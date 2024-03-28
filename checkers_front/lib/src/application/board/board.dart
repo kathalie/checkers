@@ -12,6 +12,10 @@ abstract interface class Board {
 
   Iterable<Position> get blacks;
 
+  Movement? get lastMove;
+
+  set lastMove(Movement? movement);
+
   MoveMode moveMode({required Position from, required Position to});
 
   Iterable<CanMoveOrBeat> possibleMoves({required Position from});

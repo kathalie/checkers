@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 
 import '../../domain/constraints/checker_color.dart';
-import 'board.dart';
 import '../checker.dart';
+import 'board.dart';
 
 extension BoardEvaluation on Board {
   int evaluate(CheckerColor player) => [whites, blacks]

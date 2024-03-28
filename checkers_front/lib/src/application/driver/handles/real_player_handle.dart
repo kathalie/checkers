@@ -10,6 +10,9 @@ class RealPlayerHandle implements PlayerHandle {
   String get name => 'Real player';
 
   @override
+  bool get needsAnimation => false;
+
+  @override
   final CheckerColor color;
 
   final StreamController<Movement> _movementStreamController = StreamController.broadcast();

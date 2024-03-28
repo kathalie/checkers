@@ -16,6 +16,9 @@ class BoardImpl extends _BoardImpl with BoardMixin {
 
   final Set<Position> _blackCheckersCache = {};
 
+  @override
+  Movement? lastMove;
+
   BoardImpl(this._field) {
     _cacheCheckers();
   }
