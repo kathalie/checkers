@@ -16,6 +16,9 @@ class BoardImpl extends _BoardImpl with BoardMixin {
 
   final Set<Position> _blackCheckersCache = {};
 
+  @override
+  Movement? lastMove;
+
   BoardImpl(this._field) {
     _cacheCheckers();
   }
@@ -80,4 +83,12 @@ class BoardImpl extends _BoardImpl with BoardMixin {
 
   @override
   int get hashCode => _field.hashCode;
+
+  @override
+  Board copy() => BoardImpl(
+        List.from(
+          _field.map((row) => row.toList(growable: false)),
+          growable: false,
+        ),
+      );
 }

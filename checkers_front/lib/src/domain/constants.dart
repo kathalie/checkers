@@ -13,5 +13,8 @@ const filledRows = 3;
 /// The duration of the majority of the in-game animations.
 const animationDuration = Duration(milliseconds: 650);
 
+/// The duration of the piece movement animation.
+const pieceMovementDuration = Duration(milliseconds: 350);
+
 /// A url of the prolog backend service.
 const prologUrl = 'http://localhost:8001';

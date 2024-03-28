@@ -54,8 +54,9 @@ class Checker {
       other is Checker &&
           runtimeType == other.runtimeType &&
           color == other.color &&
-          isKing == other.isKing;
+          isKing == other.isKing &&
+          key == other.key;
 
   @override
-  int get hashCode => color.hashCode ^ isKing.hashCode;
+  int get hashCode => color.hashCode ^ isKing.hashCode ^ key.hashCode;
 }

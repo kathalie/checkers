@@ -17,15 +17,11 @@ class PrologPlayerService {
     required Position? lastMoved,
     required int depth,
   }) async {
-    print(BoardStateDto.represent(depth: depth, board: board).toJson());
-
     final res = await http.post(
       serviceUri.resolve(bestMoveEndpoint),
       body: BoardStateDto.represent(depth: depth, board: board).toJson(),
       headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType},
     );
-
-    print(res.body);
 
     if (res.statusCode != 200) {
       print(res.bodyBytes);

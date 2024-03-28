@@ -4,10 +4,13 @@ import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
 import '../board/board.dart';
+import '../board/board_winner.dart';
 import '../checker.dart';
 import 'player_handle.dart';
 
 class GameDriver extends ChangeNotifier {
+  static Future<void> noAnimationCallback() => Future.delayed(const Duration());
+
   final Board board;
   final Handles _handles;
   CheckerColor _currentPlayerColor = CheckerColor.white;
@@ -15,6 +18,12 @@ class GameDriver extends ChangeNotifier {
 
   /// Is called when the movement has been made and the turn was switched.
   void Function()? onStepEnded;
+
+  /// This callback is called after the board has been changed if the current
+  /// handle requires animation.
+  ///
+  /// The driver will wait for the returned Future to complete before switching turns.
+  Future<void> Function() animationCallback = noAnimationCallback;
 
   GameDriver(
     this.board, {
@@ -30,12 +39,19 @@ class GameDriver extends ChangeNotifier {
   PlayerHandle get currentHandle =>
       _currentPlayerColor == CheckerColor.white ? _handles.white : _handles.black;
 
-  bool get isGameOver => board.whites.isEmpty || board.blacks.isEmpty;
+  bool get isGameOver => winner != null;
+
+  CheckerColor? _winner;
+
+  CheckerColor? get winner => _winner ?? board.winner;
 
   void _switchTurn() {
     _currentPlayerColor = _currentPlayerColor.flipped();
     _lastMoved = null;
   }
+
+  PlayerHandle handleOf(CheckerColor playerColor) =>
+      playerColor == CheckerColor.white ? _handles.white : _handles.black;
 
   bool _isDisposed = false;
 
@@ -80,9 +96,16 @@ class GameDriver extends ChangeNotifier {
         depth: depth,
       );
 
+      if (movement == null) {
+        _winner = currentPlayer.flipped();
+        return;
+      }
+
       from = movement.from;
       to = movement.to;
-    } catch (err) {
+    } on Error catch (err) {
+      print(err);
+      print(err.stackTrace);
       return;
     }
 
@@ -98,6 +121,7 @@ class GameDriver extends ChangeNotifier {
         );
       case CanMove():
         _move(from: from, to: to);
+        await _waitForAnimationIfNeeded();
         _onMoved();
         _switchTurn();
       case MustBeat(:final at):
@@ -105,6 +129,7 @@ class GameDriver extends ChangeNotifier {
           throw StateError('Cannot beat a missing checker at $at');
         }
         _move(from: from, to: to);
+        await _waitForAnimationIfNeeded();
         board[at] = null;
         _onMoved();
 
@@ -115,14 +140,23 @@ class GameDriver extends ChangeNotifier {
         throw StateError('Something went terribly wrong with MoveMode switch');
     }
 
-    onStepEnded?.call();
     notifyListeners();
+    onStepEnded?.call();
+  }
+
+  Future<void> _waitForAnimationIfNeeded() async {
+    if (!currentHandle.needsAnimation) {
+      return;
+    }
+
+    return animationCallback();
   }
 
   void _move({required Position from, required Position to}) {
     board[to] = board[from];
     board[from] = null;
     _lastMoved = to;
+    board.lastMove = (from: from, to: to);
   }
 
   void _promoteAt(Position pos) {

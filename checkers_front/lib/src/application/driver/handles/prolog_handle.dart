@@ -10,6 +10,9 @@ class PrologHandle implements PlayerHandle {
   String get name => 'Prolog AI';
 
   @override
+  bool get needsAnimation => true;
+
+  @override
   final CheckerColor color;
 
   final PrologPlayerService _service;
@@ -20,20 +23,25 @@ class PrologHandle implements PlayerHandle {
   }) : _service = service;
 
   @override
-  Future<Movement> takeTurn({
+  Future<Movement?> takeTurn({
     required Board board,
     required Position? lastMoved,
     required int depth,
   }) async {
     final shallFlip = color == CheckerColor.black;
 
-    final movement = await _service.fetchTurn(
-      board: shallFlip ? BoardMirror(board) : board,
-      lastMoved: lastMoved,
-      depth: depth,
-    );
-
-    await Future.delayed(const Duration(milliseconds: 250));
+    late final Movement movement;
+    try {
+      movement = await _service.fetchTurn(
+        board: shallFlip ? BoardMirror(board) : board,
+        lastMoved: lastMoved,
+        depth: depth,
+      );
+    } on Error catch (err) {
+      print(err);
+      print(err.stackTrace);
+      return null;
+    }
 
     if (!shallFlip) {
       return movement;

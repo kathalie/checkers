@@ -2,125 +2,135 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/board/board.dart';
-import '../../application/checker.dart';
-import '../../application/driver/handles/real_player_handle.dart';
-import '../../application/providers/current_handle_provider.dart';
-import '../../application/providers/session_settings_notifier.dart';
-import '../../application/providers/movable_checkers_provider.dart';
-import '../../application/providers/possible_moves_notifier.dart';
+import '../../application/driver/game_driver.dart';
+import '../../application/providers/game_driver_provider.dart';
 import '../../domain/constants.dart';
-import '../../domain/constraints/move_mode.dart';
-import '../../domain/position_functions.dart';
 import '../../domain/typedefs.dart';
 import '../../util/coordinates_transform.dart';
-import '../visuals.dart';
+import '../animation/position_tween.dart';
+import 'board_cell.dart';
 import 'checker_widget.dart';
 
-class BoardWidget extends StatelessWidget {
+class BoardWidget extends ConsumerStatefulWidget {
   final Board board;
 
   const BoardWidget({required this.board, super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1 / 1,
-      child: GridView.count(
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 8,
-        children: List.generate(
-          8 * 8,
-          (index) => BoardCell.fromBoard(board, position: flatToPosition(index)),
-        ),
-      ),
-    );
-  }
+  ConsumerState<BoardWidget> createState() => _BoardWidgetState();
 }
 
-class BoardCell extends ConsumerWidget {
-  final (int, int) position;
-  final Checker? pieceContained;
+class _BoardWidgetState extends ConsumerState<BoardWidget> with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController = AnimationController(
+    duration: pieceMovementDuration,
+    vsync: this,
+  );
 
-  const BoardCell({
-    required this.position,
-    this.pieceContained,
-    super.key,
-  });
+  Movement? _animatingBetween;
+  Animation<PartialPosition>? _pieceAnimation;
 
-  static BoardCell fromBoard(Board board, {required Position position}) =>
-      BoardCell(position: position, pieceContained: board[position]);
+  @override
+  void initState() {
+    super.initState();
+    _animationController.addStatusListener(_onAnimationStatusChange);
 
-  Border get border {
-    const side = BorderSide();
-    const noSide = BorderSide.none;
-
-    final (row, col) = position;
-
-    return Border(
-      top: row.isEven ? side : noSide,
-      right: col.isEven || col == lastIndex ? side : noSide,
-      bottom: row.isEven || row == lastIndex ? side : noSide,
-      left: col.isEven ? side : noSide,
-    );
+    ref.read(gameDriverProvider).animationCallback = _animatePieceMovement;
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pieceContained = this.pieceContained;
-    late final cellBackground = isBlackCell(position) ? blackCellColor : null;
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
-    final possibleMoves = ref.watch(movableCheckersProvider);
-    final canPieceMove = possibleMoves[position] != null;
+  Future<void> _animatePieceMovement() {
+    if (!mounted) {
+      return GameDriver.noAnimationCallback();
+    }
 
-    final possibleMove = ref
-        .watch(possibleMovesNotifierProvider)
-        .where((mode) => mode.willHighlight(position))
-        .firstOrNull;
+    _animationController.reset();
 
-    final assistHighlight = ref.watch(sessionSettingsNotifierProvider).movesHighlight
-        ? switch (possibleMove) {
-            CanMoveOrBeat(:final to) when to == position => highlightColors.accessibleCell,
-            MustBeat(:final at) when at == position => highlightColors.toBeBeatenChecker,
-            _ => null,
-          }
-        : null;
+    _animatingBetween = widget.board.lastMove;
+    final lastMove = _animatingBetween;
 
-    return DragTarget<(Checker, Position)>(
-      onWillAccept: (data) {
-        final currentHandle = ref.read(currentHandleProvider);
+    if (lastMove == null) {
+      return GameDriver.noAnimationCallback();
+    }
 
-        return currentHandle is RealPlayerHandle;
-      },
-      onAccept: (data) {
-        if (possibleMove == null) {
-          return;
-        }
+    final (:from, :to) = widget.board.lastMove ?? (from: null, to: null);
+    final tween = PositionTween.betweenPositions(begin: from, end: to);
 
-        final currentHandle = ref.read(currentHandleProvider);
+    setState(() => _pieceAnimation = _animationController.drive(tween));
+    _animationController.forward();
 
-        if (currentHandle is RealPlayerHandle) {
-          currentHandle.movementSink.add(
-            (from: data.$2, to: possibleMove.to),
-          );
-        }
-      },
-      builder: (context, candidateData, rejectedData) => AspectRatio(
-        aspectRatio: 1 / 1,
-        child: Container(
-          decoration: BoxDecoration(
-            border: border,
-            color:
-                assistHighlight ?? (canPieceMove ? highlightColors.movableChecker : cellBackground),
-          ),
-          child: pieceContained != null
-              ? Center(
-                  child: CheckerWidget(
-                    checker: pieceContained,
-                    position: position,
+    return Future.delayed(
+      _animationController.duration ?? pieceMovementDuration,
+    );
+  }
+
+  void _onAnimationStatusChange(AnimationStatus status) {
+    if (!mounted) {
+      return;
+    }
+
+    if (status == AnimationStatus.completed) {
+      setState(() => _animatingBetween = null);
+      _pieceAnimation = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final (from: animatingFrom, to: animatingTo) = _animatingBetween ?? (from: null, to: null);
+    final pieceAnimation = _pieceAnimation;
+
+    return AspectRatio(
+      aspectRatio: 1 / 1,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dimension = constraints.maxWidth;
+          final cellDimension = dimension / boardSide;
+
+          return Stack(
+            children: [
+              GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: boardSide,
+                children: List.generate(
+                  boardCellCount,
+                  (index) {
+                    final pos = flatToPosition(index);
+
+                    return BoardCell.fromBoard(
+                      widget.board,
+                      position: pos,
+                      displayPiece: (animatingFrom != pos && animatingTo != pos),
+                    );
+                  },
+                ),
+              ),
+              if (pieceAnimation != null)
+                ListenableBuilder(
+                  listenable: pieceAnimation,
+                  builder: (context, _) => Positioned(
+                    top: pieceAnimation.value.$1 * cellDimension,
+                    left: pieceAnimation.value.$2 * cellDimension,
+                    child: Padding(
+                      padding: const EdgeInsets.all(2.5),
+                      child: Consumer(
+                        builder: (context, ref, child) => CheckerPiece.color(
+                          ref.watch(gameDriverProvider).currentPlayer,
+                          isKing: animatingTo != null
+                              ? widget.board[animatingTo]?.isKing ?? false
+                              : false,
+                        ),
+                      ),
+                    ),
                   ),
-                )
-              : null,
-        ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

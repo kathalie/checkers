@@ -7,7 +7,9 @@ abstract interface class PlayerHandle {
 
   CheckerColor get color;
 
-  Future<Movement> takeTurn({
+  bool get needsAnimation;
+
+  Future<Movement?> takeTurn({
     required Board board,
     required Position? lastMoved,
     required int depth,

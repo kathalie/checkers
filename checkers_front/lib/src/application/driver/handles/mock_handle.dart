@@ -8,6 +8,9 @@ class MockHandle implements PlayerHandle {
   String get name => 'Mock';
 
   @override
+  bool get needsAnimation => true;
+
+  @override
   final CheckerColor color;
 
   const MockHandle(this.color);
