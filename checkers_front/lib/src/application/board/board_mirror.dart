@@ -57,7 +57,7 @@ class BoardMirror extends _BoardMirror with BoardMixin {
 Position flip(Position pos) {
   final (row, col) = pos;
 
-  return (lastIndex - row, col);
+  return (lastIndex - row, lastIndex - col);
 }
 
 extension _ColorFlip on Checker {

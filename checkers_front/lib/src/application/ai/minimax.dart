@@ -6,6 +6,7 @@ import '../../domain/typedefs.dart';
 import '../board/board.dart';
 import '../board/board_children.dart';
 import '../board/board_evaluation.dart';
+import '../board/board_winner.dart';
 
 const _maxVal = 100000;
 
@@ -21,15 +22,15 @@ Movement? maybeDifference(Board a, Board b, CheckerColor lastMoved) {
   return from != null && to != null ? (from: from, to: to) : null;
 }
 
-Board? nextBoard(Board board, int depth, Position? lastMoved) {
-  final children = _children(board, CheckerColor.white, lastMoved);
+Board? nextBoard(Board board, int depth, Position? lastMoved, CheckerColor playerColor) {
+  final children = _children(board, playerColor, lastMoved);
 
   Board? bestBoard = children.firstOrNull;
 
   var eval = -_maxVal;
 
   for (final child in children) {
-    final val = minimax(child, depth, -100000, 100000, CheckerColor.black);
+    final val = minimax(child, depth, -100000, 100000, playerColor.flipped(), playerColor);
 
     if (val > eval) {
       eval = val;
@@ -40,23 +41,30 @@ Board? nextBoard(Board board, int depth, Position? lastMoved) {
   return bestBoard;
 }
 
-int minimax(Board board, int depth, int alpha, int beta, CheckerColor maximizingPlayer) {
+int minimax(
+  Board board,
+  int depth,
+  int alpha,
+  int beta,
+  CheckerColor maximizingPlayer,
+  CheckerColor playerColor,
+) {
   if (depth == 0) {
     return board.evaluate(maximizingPlayer);
   }
 
   final boardWinner = board.winner;
   if (boardWinner != null) {
-    return (boardWinner == CheckerColor.white ? 100000 : -100000);
+    return (boardWinner == playerColor ? 100000 : -100000);
   }
 
   final children = _children(board, maximizingPlayer, null);
 
-  if (maximizingPlayer == CheckerColor.white) {
+  if (maximizingPlayer == playerColor) {
     var maxEval = -_maxVal;
 
     for (final child in children) {
-      final eval = minimax(child, depth - 1, alpha, beta, CheckerColor.black);
+      final eval = minimax(child, depth - 1, alpha, beta, maximizingPlayer.flipped(), playerColor);
       maxEval = max(maxEval, eval);
       alpha = max(alpha, eval);
       if (beta <= alpha) {
@@ -70,7 +78,7 @@ int minimax(Board board, int depth, int alpha, int beta, CheckerColor maximizing
   var minEval = _maxVal;
 
   for (final child in children) {
-    final eval = minimax(child, depth - 1, alpha, beta, CheckerColor.white);
+    final eval = minimax(child, depth - 1, alpha, beta, maximizingPlayer.flipped(), playerColor);
     minEval = min(minEval, eval);
     beta = min(beta, eval);
     if (beta <= alpha) {
@@ -97,18 +105,4 @@ Iterable<Board> _children(Board board, CheckerColor maximizingPlayer, Position? 
   final moves = modes.map((mode) => (from: mode.from, to: mode.to));
 
   return board.childrenFrom(moves);
-}
-
-extension _BoardWinner on Board {
-  CheckerColor? get winner {
-    if (whites.isEmpty) {
-      return CheckerColor.black;
-    }
-
-    if (blacks.isEmpty) {
-      return CheckerColor.white;
-    }
-
-    return null;
-  }
 }

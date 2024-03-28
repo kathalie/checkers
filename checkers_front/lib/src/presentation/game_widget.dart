@@ -90,6 +90,7 @@ class _GameWidgetState extends ConsumerState<GameWidget> {
               child: Container(
                 width: 200,
                 height: 180,
+                padding: const EdgeInsets.all(8),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   border: Border.all(),
@@ -97,7 +98,7 @@ class _GameWidgetState extends ConsumerState<GameWidget> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Winner: ${driver.winner ?? driver.currentPlayer.flipped().name}',
+                  'Winner: ${(driver.winner ?? driver.currentPlayer.flipped()).name}',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.green[700]),
                 ),
               ),

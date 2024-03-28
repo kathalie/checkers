@@ -39,7 +39,7 @@ class PlayerSelector extends ConsumerWidget {
     final handles = [
       RealPlayerHandle(color),
       PrologHandle(color, service: prologService),
-      if (color == CheckerColor.white) DartHandle(color),
+      DartHandle(color),
     ];
 
     final selected = this.selected;

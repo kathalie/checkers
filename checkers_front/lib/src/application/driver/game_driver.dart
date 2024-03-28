@@ -4,6 +4,7 @@ import '../../domain/constraints/checker_color.dart';
 import '../../domain/constraints/move_mode.dart';
 import '../../domain/typedefs.dart';
 import '../board/board.dart';
+import '../board/board_winner.dart';
 import '../checker.dart';
 import 'player_handle.dart';
 
@@ -38,11 +39,11 @@ class GameDriver extends ChangeNotifier {
   PlayerHandle get currentHandle =>
       _currentPlayerColor == CheckerColor.white ? _handles.white : _handles.black;
 
-  bool get isGameOver => winner != null || board.whites.isEmpty || board.blacks.isEmpty;
+  bool get isGameOver => winner != null;
 
   CheckerColor? _winner;
 
-  CheckerColor? get winner => _winner;
+  CheckerColor? get winner => _winner ?? board.winner;
 
   void _switchTurn() {
     _currentPlayerColor = _currentPlayerColor.flipped();

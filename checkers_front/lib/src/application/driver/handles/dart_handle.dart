@@ -4,7 +4,6 @@ import '../../../domain/constraints/checker_color.dart';
 import '../../../domain/typedefs.dart';
 import '../../ai/minimax.dart';
 import '../../board/board.dart';
-import '../../board/board_mirror.dart';
 import '../player_handle.dart';
 
 class DartHandle implements PlayerHandle {
@@ -25,30 +24,18 @@ class DartHandle implements PlayerHandle {
     required Position? lastMoved,
     required int depth,
   }) async {
-    // todo dart ai for black checkers
-
-    final shallFlip = color == CheckerColor.black;
-
     final next = await compute(
-      (message) => nextBoard(message.$1, message.$2, message.$3),
-      (shallFlip ? BoardMirror(board) : board, 5, lastMoved),
+      (message) => nextBoard(message.$1, message.$2, message.$3, message.$4),
+      (board, 5, lastMoved, color),
     );
 
     if (next == null) {
       return null;
     }
 
-    final movement = maybeDifference(
-      shallFlip ? BoardMirror(board) : board,
-      next,
-      color,
-    );
+    final movement = maybeDifference(board, next, color);
 
-    if (movement == null || !shallFlip) {
-      return movement;
-    }
-
-    return (from: flip(movement.from), to: flip(movement.to));
+    return movement;
   }
 
   @override
