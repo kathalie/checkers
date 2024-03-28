@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../application/driver/handles/dart_handle.dart';
 import '../../application/driver/handles/prolog_handle.dart';
 import '../../application/driver/handles/real_player_handle.dart';
 import '../../application/driver/player_handle.dart';
@@ -38,6 +39,7 @@ class PlayerSelector extends ConsumerWidget {
     final handles = [
       RealPlayerHandle(color),
       PrologHandle(color, service: prologService),
+      DartHandle(color),
     ];
 
     final selected = this.selected;
