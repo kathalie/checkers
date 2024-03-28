@@ -12,5 +12,5 @@ extension BoardEvaluation on Board {
 }
 
 extension CheckerEvaluation on Checker {
-  int evaluate(CheckerColor player) => (color == player ? 1 : -1) * (1 + (isKing ? 10 : 0));
+  int evaluate(CheckerColor player) => (color == player ? 1 : -1) * (2 + (isKing ? 10 : 0));
 }

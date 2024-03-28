@@ -26,7 +26,7 @@ class DartHandle implements PlayerHandle {
   }) async {
     final next = await compute(
       (message) => nextBoard(message.$1, message.$2, message.$3, message.$4),
-      (board, 5, lastMoved, color),
+      (board, 6, lastMoved, color),
     );
 
     if (next == null) {

@@ -27,16 +27,18 @@ Board? nextBoard(Board board, int depth, Position? lastMoved, CheckerColor playe
 
   Board? bestBoard = children.firstOrNull;
 
-  var eval = -_maxVal;
+  var eval = _maxVal;
 
   for (final child in children) {
     final val = minimax(child, depth, -100000, 100000, playerColor.flipped(), playerColor);
 
-    if (val > eval) {
+    if (val < eval) {
       eval = val;
       bestBoard = child;
     }
   }
+
+  print(eval);
 
   return bestBoard;
 }
@@ -55,7 +57,7 @@ int minimax(
 
   final boardWinner = board.winner;
   if (boardWinner != null) {
-    return (boardWinner == playerColor ? 100000 : -100000);
+    return (boardWinner != playerColor ? 100000 : -100000);
   }
 
   final children = _children(board, maximizingPlayer, null);
