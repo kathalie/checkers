@@ -126,16 +126,16 @@ minimax(Board, Depth, _, _, Player, Eval) :-
 
 % Case when to get the worst board for the opponent.
 minimax(Board, Depth, Alpha, Beta, Player, Eval) :- 
-    write(Player), write(' '), write(Depth), write(' '), write(Eval), nl,
-    boards:print_board(Board), nl,
+    %write(Player), write(' '), write(Depth), write(' '), write(Eval), nl,
+    %boards:print_board(Board), nl,
     minimizing(Player),
     minimax_helper(Board, NewBoard, Depth, NewDepth, Player),
     minEval(NewBoard, NewDepth, Alpha, Beta, Player, 9999, Eval).
 
 % Case when to get the best board for the current player.
 minimax(Board, Depth, Alpha, Beta, Player, Eval) :- 
-    write(Player), write(' '), write(Depth), write(' '), write(Eval), nl,
-    boards:print_board(Board), nl,
+    %write(Player), write(' '), write(Depth), write(' '), write(Eval), nl,
+    %boards:print_board(Board), nl,
     maximizing(Player),
     minimax_helper(Board, NewBoard, Depth, NewDepth, Player),
     maxEval(NewBoard, NewDepth, Alpha, Beta, Player, -9999, Eval).
