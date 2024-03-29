@@ -14,8 +14,8 @@ class SessionSettingsNotifier extends _$SessionSettingsNotifier {
     return SessionSettings(
       movesHighlight: false,
       aiDifficulties: {
-        CheckerColor.white: 5,
-        CheckerColor.black: 5,
+        CheckerColor.white: 4,
+        CheckerColor.black: 4,
       }.lock,
     );
   }

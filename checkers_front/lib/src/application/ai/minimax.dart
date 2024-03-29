@@ -57,7 +57,7 @@ int minimax(
 
   final boardWinner = board.winner;
   if (boardWinner != null) {
-    return (boardWinner != playerColor ? 100000 : -100000);
+    return (boardWinner == maximizingPlayer ? -100000 : 100000);
   }
 
   final children = _children(board, maximizingPlayer, null);

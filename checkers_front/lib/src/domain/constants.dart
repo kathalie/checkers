@@ -14,7 +14,7 @@ const filledRows = 3;
 const animationDuration = Duration(milliseconds: 650);
 
 /// The duration of the piece movement animation.
-const pieceMovementDuration = Duration(milliseconds: 350);
+const pieceMovementDuration = Duration(milliseconds: 250);
 
 /// A url of the prolog backend service.
 const prologUrl = 'http://localhost:8001';
