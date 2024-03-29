@@ -68,11 +68,11 @@ class PlayerSelector extends ConsumerWidget {
       ],
     );
 
-    if (selected is! PrologHandle) {
+    if (selected is RealPlayerHandle) {
       return child;
     }
 
-    const depths = [3, 5, 10];
+    const depths = [2, 4, 6];
     const labels = ['Beginner', 'Master', 'Pro'];
     final currentValue = settings.aiDifficulties[color]!;
 

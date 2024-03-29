@@ -24,8 +24,8 @@ class PrologPlayerService {
     );
 
     if (res.statusCode != 200) {
-      print(res.bodyBytes);
-      throw 'Something went wrong';
+      print(res.body);
+      throw 'Server replied with the status code of ${res.statusCode}';
     }
 
     final body = jsonDecode(utf8.decode(res.bodyBytes));
