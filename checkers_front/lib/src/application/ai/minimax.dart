@@ -9,6 +9,7 @@ import '../board/board_evaluation.dart';
 import '../board/board_winner.dart';
 
 const _maxVal = 100000;
+final _rand = Random();
 
 Movement difference(Board a, Board b, CheckerColor lastMoved) => maybeDifference(a, b, lastMoved)!;
 
@@ -32,7 +33,7 @@ Board? nextBoard(Board board, int depth, Position? lastMoved, CheckerColor playe
   for (final child in children) {
     final val = minimax(child, depth, -100000, 100000, playerColor.flipped(), playerColor);
 
-    if (val < eval) {
+    if (val < eval || (val == eval && _rand.nextInt(2) == 0)) {
       eval = val;
       bestBoard = child;
     }
@@ -55,7 +56,7 @@ int minimax(
     return board.evaluate(maximizingPlayer);
   }
 
-  final boardWinner = board.winner;
+  final boardWinner = board.winner(maximizingPlayer);
   if (boardWinner != null) {
     return (boardWinner == maximizingPlayer ? -100000 : 100000);
   }
