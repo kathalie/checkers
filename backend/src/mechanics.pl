@@ -52,16 +52,18 @@ opponent(white, black).
 opponent(black, white).
 
 % Checks if there is a winner.
-% wins(+Board, ?Ch).
+% wins(+Board, ?Player).
 wins(Board, black) :-
     \+ member(cell(_, w, _, _), Board),
     \+ member(cell(_, wq, _, _), Board).
 
-% wins(+Board, ?Ch).
 wins(Board, white) :-
     \+ member(cell(_, b, _, _), Board),
     \+ member(cell(_, bq, _, _), Board).
 
+% wins(Board, Player) :-
+%     opponent(Player, Opponent),
+%     \+ available_actions(Opponent, Board, _).
 
 game_over(Board) :- wins(Board, _).
 
@@ -180,6 +182,9 @@ move_forward(Cell, Board, NewBoards) :-
 move_in_direction(X, Y, Dist, Cell, Board, NewBoards) :-
     Cell = cell(_, Ch, R, C),
     queen(Ch),
+    RNext is R + X, CNext is C + Y,
+    % Check if there is no checker right next to the Cell
+    \+ checker(Board, _, RNext, CNext, _), 
     (
         % If there is space for a queen to move further, move.
         (
@@ -215,19 +220,24 @@ possible_forward_moves(Player, Board, NewBoards) :-
     checker(Board, K, R, C, Ch),
     move_forward(cell(K, Ch, R, C), Board, NewBoards).
 
+
 % Finds all the possible actions moves for Player (white, black).
 % If Player can eat opponent's checker, it becomes obligatory and all the variants 
 % of eating opponent's checkers are generated.
 % Otherwise, possible moves for simple checkers are generated.
-% possible_forward_moves(+Player, +Board, -NewBoards).
-possible_actions(Player, Board, NewBoards) :-
-    \+ game_over(Board),
+% available_actions(+Player, +Board, -NewBoards).
+available_actions(Player, Board, NewBoards) :-
     must_eat(Player, Board, NewBoards).
 
-possible_actions(Player, Board, NewBoards) :-
-    \+ game_over(Board),
+available_actions(Player, Board, NewBoards) :-
     \+ must_eat(Player, Board, _),
     possible_forward_moves(Player, Board, NewBoards).
+
+% possible_actions(+Player, +Board, -NewBoards).
+possible_actions(Player, Board, NewBoards) :-
+    \+ game_over(Board),
+    available_actions(Player, Board, NewBoards).
+    
 
 
 /** <examples>

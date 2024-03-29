@@ -61,8 +61,18 @@ Board = [cell(15, w, 7, 0),
 boards:print_board(Board), nl,
 best_board(Board, 5, white, BestBoard),
 boards:print_board(BestBoard), nl.
-*/
 
+Board = [cell(70, b, 1, 7),
+       cell(47, b, 3, 7),
+       cell(54, b, 3, 5),
+       cell(63, b, 2, 4),
+       cell(15, b, 3, 3),
+       cell(22, b, 3, 1),
+       cell(64, w, 5, 7)],
+boards:print_board(Board), nl,
+best_board(Board, 5, white, BestBoard),
+boards:print_board(BestBoard), nl.
+*/
 
 
 
@@ -99,9 +109,10 @@ best_board(Board, Depth, Player, BestBoard) :-
         possible_actions(Player, Board, NextBoard),
         NextBoards
     ),
+    member(_,NextBoards), % Check that there are available moves! 
     best_board(NextBoards, Depth, -9999, 9999, Player, _, BestBoard), !.
 
-% best_board(+Boards, +Depth, +Alpha, +Beta, +Player, +CurrentBestBoard, -BestBoard).
+%best_board(+Boards, +Depth, +Alpha, +Beta, +Player, +CurrentBestBoard, -BestBoard).
 best_board([], _, _, _, _, BestBoard, BestBoard).
 
 best_board([NextBoard | Rest], Depth, Alpha, Beta, Player, _, BestBoard) :-
@@ -119,23 +130,23 @@ best_board([NextBoard | Rest], Depth, Alpha, Beta, Player, CurrentBestBoard, Bes
 % Base cases when the game is over or it is the maximum wanted depth.
 minimax(Board, Depth, _, _, Player, Eval) :-  
     (
-        game_over(Board);
-        Depth =:= 0
+        Depth =:= 0;
+        \+ possible_actions(Player, Board, _)
     ),
     evaluate_board(Player, Board, Eval).
 
 % Case when to get the worst board for the opponent.
 minimax(Board, Depth, Alpha, Beta, Player, Eval) :- 
-    %write(Player), write(' '), write(Depth), write(' '), write(Eval), nl,
-    %boards:print_board(Board), nl,
+    % write(Player), write(' '), write(Depth), write(' '), write(Eval), nl,
+    % boards:print_board(Board), nl,
     minimizing(Player),
     minimax_helper(Board, NewBoard, Depth, NewDepth, Player),
     minEval(NewBoard, NewDepth, Alpha, Beta, Player, 9999, Eval).
 
 % Case when to get the best board for the current player.
 minimax(Board, Depth, Alpha, Beta, Player, Eval) :- 
-    %write(Player), write(' '), write(Depth), write(' '), write(Eval), nl,
-    %boards:print_board(Board), nl,
+    % write(Player), write(' '), write(Depth), write(' '), write(Eval), nl,
+    % boards:print_board(Board), nl,
     maximizing(Player),
     minimax_helper(Board, NewBoard, Depth, NewDepth, Player),
     maxEval(NewBoard, NewDepth, Alpha, Beta, Player, -9999, Eval).
