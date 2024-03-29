@@ -43,7 +43,7 @@ class GameDriver extends ChangeNotifier {
 
   CheckerColor? _winner;
 
-  CheckerColor? get winner => _winner ?? board.winner;
+  CheckerColor? get winner => _winner ?? board.winner(currentPlayer);
 
   void _switchTurn() {
     _currentPlayerColor = _currentPlayerColor.flipped();

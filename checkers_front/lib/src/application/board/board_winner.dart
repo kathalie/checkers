@@ -2,12 +2,12 @@ import '../../domain/constraints/checker_color.dart';
 import 'board.dart';
 
 extension BoardWinner on Board {
-  CheckerColor? get winner {
-    if (whites.isEmpty || !canMove(CheckerColor.white)) {
+  CheckerColor? winner(CheckerColor currentPlayer) {
+    if (whites.isEmpty || (currentPlayer == CheckerColor.white && !canMove(CheckerColor.white))) {
       return CheckerColor.black;
     }
 
-    if (blacks.isEmpty || !canMove(CheckerColor.black)) {
+    if (blacks.isEmpty || (currentPlayer == CheckerColor.black && !canMove(CheckerColor.black))) {
       return CheckerColor.white;
     }
 
